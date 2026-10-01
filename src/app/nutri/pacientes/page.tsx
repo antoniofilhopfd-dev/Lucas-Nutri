@@ -13,7 +13,7 @@ export default async function Pacientes() {
       {error ? <p role="alert" className="mt-4">Não foi possível carregar os pacientes. Tente novamente.</p>
         : !data?.length ? <p className="mt-6 text-graphite/70">Nenhum paciente ainda. Cadastre o primeiro para iniciar um prontuário.</p>
         : <ul className="mt-4 divide-y divide-mist rounded-xl border border-mist bg-white">
-            {data.map((p: any) => <li key={p.id} className="p-3">{p.profiles?.full_name ?? "—"}</li>)}</ul>}
+            {data.map((p: any) => <li key={p.id}><Link href={`/nutri/pacientes/${p.id}`} className="block p-3 hover:bg-mist/40">{p.profiles?.full_name ?? "—"}</Link></li>)}</ul>}
     </section>
   );
 }

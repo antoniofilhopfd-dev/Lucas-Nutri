@@ -1,0 +1,947 @@
+{
+    "diets": {
+        "id": {
+            "required": false
+        },
+        "notes": {
+            "required": false
+        },
+        "status": {
+            "required": false
+        },
+        "version": {
+            "required": false
+        },
+        "vet_kcal": {
+            "required": false
+        },
+        "parent_id": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "created_by": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "published_at": {
+            "required": false
+        },
+        "consultation_id": {
+            "required": true
+        }
+    },
+    "consents": {
+        "id": {
+            "required": false
+        },
+        "purpose": {
+            "required": true
+        },
+        "version": {
+            "required": true
+        },
+        "patient_id": {
+            "required": true
+        },
+        "revoked_at": {
+            "required": false
+        },
+        "accepted_at": {
+            "required": false
+        }
+    },
+    "messages": {
+        "id": {
+            "required": false
+        },
+        "body": {
+            "required": false
+        },
+        "kind": {
+            "required": true
+        },
+        "read_at": {
+            "required": false
+        },
+        "sent_at": {
+            "required": false
+        },
+        "sender_id": {
+            "required": false
+        },
+        "audio_path": {
+            "required": false
+        },
+        "duration_s": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "receiver_id": {
+            "required": true
+        }
+    },
+    "patients": {
+        "id": {
+            "required": true
+        },
+        "email": {
+            "required": false
+        },
+        "phone": {
+            "required": false
+        },
+        "active": {
+            "required": false
+        },
+        "address": {
+            "required": false
+        },
+        "whatsapp": {
+            "required": false
+        },
+        "ethnicity": {
+            "required": false
+        },
+        "birth_date": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "modalities": {
+            "required": false
+        },
+        "occupation": {
+            "required": false
+        },
+        "primary_goal": {
+            "required": false
+        },
+        "biological_sex": {
+            "required": true
+        },
+        "preferred_name": {
+            "required": false
+        },
+        "gender_identity": {
+            "required": false
+        },
+        "nutritionist_id": {
+            "required": true
+        },
+        "secondary_goals": {
+            "required": false
+        },
+        "practices_sports": {
+            "required": false
+        },
+        "primary_modality": {
+            "required": false
+        },
+        "weekly_frequency": {
+            "required": false
+        },
+        "sexual_orientation": {
+            "required": false
+        },
+        "usual_training_time": {
+            "required": false
+        }
+    },
+    "profiles": {
+        "id": {
+            "required": true
+        },
+        "role": {
+            "required": false
+        },
+        "full_name": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        }
+    },
+    "anamneses": {
+        "id": {
+            "required": false
+        },
+        "raw_text": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "transcript": {
+            "required": false
+        },
+        "stt_provider": {
+            "required": false
+        },
+        "consultation_id": {
+            "required": true
+        },
+        "audio_storage_path": {
+            "required": false
+        },
+        "extractor_provider": {
+            "required": false
+        }
+    },
+    "audit_logs": {
+        "id": {
+            "required": false
+        },
+        "action": {
+            "required": true
+        },
+        "entity": {
+            "required": true
+        },
+        "user_id": {
+            "required": false
+        },
+        "entity_id": {
+            "required": false
+        },
+        "new_value": {
+            "required": false
+        },
+        "old_value": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": false
+        },
+        "consultation_id": {
+            "required": false
+        }
+    },
+    "diet_foods": {
+        "id": {
+            "required": false
+        },
+        "notes": {
+            "required": false
+        },
+        "food_id": {
+            "required": true
+        },
+        "meal_id": {
+            "required": true
+        },
+        "quantity": {
+            "required": true
+        },
+        "substitution_for": {
+            "required": false
+        },
+        "household_measure": {
+            "required": false
+        }
+    },
+    "diet_meals": {
+        "id": {
+            "required": false
+        },
+        "name": {
+            "required": true
+        },
+        "notes": {
+            "required": false
+        },
+        "diet_id": {
+            "required": true
+        },
+        "position": {
+            "required": false
+        },
+        "meal_time": {
+            "required": false
+        }
+    },
+    "body_photos": {
+        "id": {
+            "required": false
+        },
+        "angle": {
+            "required": true
+        },
+        "file_size": {
+            "required": true
+        },
+        "mime_type": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "captured_at": {
+            "required": false
+        },
+        "storage_path": {
+            "required": true
+        },
+        "photometric_assessment_id": {
+            "required": true
+        }
+    },
+    "consultations": {
+        "id": {
+            "required": false
+        },
+        "status": {
+            "required": false
+        },
+        "version": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "started_at": {
+            "required": false
+        },
+        "updated_at": {
+            "required": false
+        },
+        "completed_at": {
+            "required": false
+        },
+        "record_state": {
+            "required": false
+        },
+        "scheduled_at": {
+            "required": false
+        },
+        "clinical_notes": {
+            "required": false
+        },
+        "nutritionist_id": {
+            "required": true
+        },
+        "consultation_type": {
+            "required": true
+        }
+    },
+    "food_database": {
+        "id": {
+            "required": false
+        },
+        "fat": {
+            "required": true
+        },
+        "name": {
+            "required": true
+        },
+        "fiber": {
+            "required": false
+        },
+        "sodium": {
+            "required": false
+        },
+        "source": {
+            "required": true
+        },
+        "license": {
+            "required": true
+        },
+        "protein": {
+            "required": true
+        },
+        "calories": {
+            "required": true
+        },
+        "carbohydrate": {
+            "required": true
+        },
+        "serving_unit": {
+            "required": false
+        },
+        "micronutrients": {
+            "required": false
+        },
+        "source_version": {
+            "required": true
+        }
+    },
+    "nutritionists": {
+        "id": {
+            "required": true
+        },
+        "crn": {
+            "required": true
+        }
+    },
+    "image_consents": {
+        "id": {
+            "required": false
+        },
+        "accepted": {
+            "required": true
+        },
+        "patient_id": {
+            "required": true
+        },
+        "revoked_at": {
+            "required": false
+        },
+        "accepted_at": {
+            "required": false
+        },
+        "consent_type": {
+            "required": true
+        },
+        "consent_version": {
+            "required": true
+        },
+        "consultation_id": {
+            "required": false
+        }
+    },
+    "micro_feedback": {
+        "id": {
+            "required": false
+        },
+        "body": {
+            "required": false
+        },
+        "kind": {
+            "required": true
+        },
+        "badge": {
+            "required": false
+        },
+        "target_id": {
+            "required": true
+        },
+        "audio_path": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "target_type": {
+            "required": true
+        },
+        "nutritionist_id": {
+            "required": false
+        }
+    },
+    "anamnesis_items": {
+        "id": {
+            "required": false
+        },
+        "field": {
+            "required": true
+        },
+        "value": {
+            "required": true
+        },
+        "status": {
+            "required": false
+        },
+        "category": {
+            "required": true
+        },
+        "confidence": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "decided_at": {
+            "required": false
+        },
+        "decided_by": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "source_kind": {
+            "required": true
+        },
+        "anamnesis_id": {
+            "required": true
+        },
+        "source_snippet": {
+            "required": false
+        }
+    },
+    "community_likes": {
+        "post_id": {
+            "required": true
+        },
+        "user_id": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        }
+    },
+    "community_posts": {
+        "id": {
+            "required": false
+        },
+        "body": {
+            "required": true
+        },
+        "kind": {
+            "required": true
+        },
+        "status": {
+            "required": false
+        },
+        "featured": {
+            "required": false
+        },
+        "author_id": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "image_path": {
+            "required": false
+        },
+        "challenge_id": {
+            "required": false
+        },
+        "community_id": {
+            "required": true
+        }
+    },
+    "patient_checkins": {
+        "id": {
+            "required": false
+        },
+        "trained": {
+            "required": false
+        },
+        "water_ml": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "updated_at": {
+            "required": false
+        },
+        "checkin_date": {
+            "required": false
+        },
+        "water_goal_ml": {
+            "required": false
+        },
+        "training_minutes": {
+            "required": false
+        },
+        "training_modality": {
+            "required": false
+        }
+    },
+    "patient_meal_logs": {
+        "id": {
+            "required": false
+        },
+        "log_date": {
+            "required": false
+        },
+        "logged_at": {
+            "required": false
+        },
+        "meal_type": {
+            "required": true
+        },
+        "patient_id": {
+            "required": true
+        },
+        "photo_path": {
+            "required": false
+        },
+        "feeling_after": {
+            "required": false
+        },
+        "feeling_before": {
+            "required": false
+        }
+    },
+    "caloric_strategies": {
+        "id": {
+            "required": false
+        },
+        "get_kcal": {
+            "required": true
+        },
+        "vet_kcal": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "macro_mode": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "macro_inputs": {
+            "required": false
+        },
+        "macro_outputs": {
+            "required": false
+        },
+        "strategy_type": {
+            "required": true
+        },
+        "strategy_value": {
+            "required": false
+        },
+        "consultation_id": {
+            "required": true
+        },
+        "energy_calculation_id": {
+            "required": true
+        }
+    },
+    "community_comments": {
+        "id": {
+            "required": false
+        },
+        "body": {
+            "required": true
+        },
+        "status": {
+            "required": false
+        },
+        "post_id": {
+            "required": true
+        },
+        "author_id": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        }
+    },
+    "energy_calculations": {
+        "id": {
+            "required": false
+        },
+        "tef": {
+            "required": false
+        },
+        "inputs": {
+            "required": true
+        },
+        "method": {
+            "required": true
+        },
+        "outputs": {
+            "required": true
+        },
+        "equation": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "created_by": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "consultation_id": {
+            "required": true
+        },
+        "equation_version": {
+            "required": true
+        }
+    },
+    "patient_health_data": {
+        "allergies": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "updated_at": {
+            "required": false
+        },
+        "medications": {
+            "required": false
+        },
+        "supplements": {
+            "required": false
+        },
+        "intolerances": {
+            "required": false
+        },
+        "family_history": {
+            "required": false
+        },
+        "relevant_exams": {
+            "required": false
+        },
+        "chief_complaint": {
+            "required": false
+        },
+        "clinical_history": {
+            "required": false
+        },
+        "reported_conditions": {
+            "required": false
+        }
+    },
+    "community_challenges": {
+        "id": {
+            "required": false
+        },
+        "title": {
+            "required": true
+        },
+        "ends_on": {
+            "required": true
+        },
+        "starts_on": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "description": {
+            "required": false
+        },
+        "nutritionist_id": {
+            "required": true
+        }
+    },
+    "skinfold_assessments": {
+        "id": {
+            "required": false
+        },
+        "protocol": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "consultation_id": {
+            "required": true
+        },
+        "protocol_version": {
+            "required": true
+        }
+    },
+    "skinfold_measurements": {
+        "id": {
+            "required": false
+        },
+        "site": {
+            "required": true
+        },
+        "value_mm": {
+            "required": true
+        },
+        "patient_id": {
+            "required": true
+        },
+        "skinfold_assessment_id": {
+            "required": true
+        }
+    },
+    "consultation_amendments": {
+        "id": {
+            "required": false
+        },
+        "reason": {
+            "required": true
+        },
+        "amended_by": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "consultation_id": {
+            "required": true
+        },
+        "previous_version": {
+            "required": true
+        },
+        "previous_snapshot": {
+            "required": true
+        }
+    },
+    "photometric_assessments": {
+        "id": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "captured_at": {
+            "required": false
+        },
+        "consultation_id": {
+            "required": true
+        }
+    },
+    "body_composition_results": {
+        "id": {
+            "required": false
+        },
+        "inputs": {
+            "required": true
+        },
+        "outputs": {
+            "required": true
+        },
+        "protocol": {
+            "required": false
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "fat_equation": {
+            "required": false
+        },
+        "consultation_id": {
+            "required": true
+        },
+        "formula_version": {
+            "required": false
+        },
+        "fat_equation_version": {
+            "required": false
+        },
+        "skinfold_assessment_id": {
+            "required": false
+        }
+    },
+    "anthropometric_assessments": {
+        "id": {
+            "required": false
+        },
+        "bmi": {
+            "required": false
+        },
+        "height_cm": {
+            "required": true
+        },
+        "weight_kg": {
+            "required": true
+        },
+        "created_at": {
+            "required": false
+        },
+        "patient_id": {
+            "required": true
+        },
+        "assessment_date": {
+            "required": true
+        },
+        "consultation_id": {
+            "required": true
+        },
+        "waist_hip_ratio": {
+            "required": false
+        },
+        "age_at_assessment": {
+            "required": true
+        },
+        "waist_height_ratio": {
+            "required": false
+        },
+        "classification_source": {
+            "required": false
+        },
+        "classification_version": {
+            "required": false
+        }
+    },
+    "circumference_measurements": {
+        "id": {
+            "required": false
+        },
+        "side": {
+            "required": false
+        },
+        "site": {
+            "required": true
+        },
+        "value_cm": {
+            "required": true
+        },
+        "patient_id": {
+            "required": true
+        },
+        "assessment_id": {
+            "required": true
+        }
+    },
+    "clinical_calculation_versions": {
+        "name": {
+            "required": true
+        },
+        "year": {
+            "required": false
+        },
+        "author": {
+            "required": false
+        },
+        "version": {
+            "required": true
+        },
+        "equation": {
+            "required": false
+        },
+        "reference": {
+            "required": true
+        },
+        "formula_id": {
+            "required": true
+        },
+        "population": {
+            "required": false
+        },
+        "review_status": {
+            "required": true
+        },
+        "effective_date": {
+            "required": true
+        }
+    }
+}
