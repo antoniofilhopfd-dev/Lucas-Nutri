@@ -1,6 +1,6 @@
 # Segunda parte: do protótipo ao produto
 
-A parte visual está fechada em `prototype/index.html` (abre direto no navegador) e nos prints de `prototype/telas/`.
+A parte visual está fechada: `prototype/index.html` (abre direto no navegador, fontes em `prototype/src/`, `python3 prototype/build.py` regenera) e prints em `prototype/telas/`.
 Este documento lista o que falta para ligar tudo a dados reais.
 
 ## 1. Infraestrutura (pré-requisitos)
