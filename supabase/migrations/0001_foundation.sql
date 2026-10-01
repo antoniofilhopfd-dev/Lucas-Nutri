@@ -66,7 +66,9 @@ create policy patients_write on patients for all using (nutritionist_id = auth.u
 
 create policy consult_read on consultations for select using (patient_id = auth.uid() or nutritionist_id = auth.uid() or is_admin());
 -- Consulta finalizada é imutável por UPDATE direto; alterações devem virar 'amended' via função auditada (fases seguintes).
-create policy consult_insert on consultations for insert with check (nutritionist_id = auth.uid() or is_admin());
+-- o paciente precisa pertencer à carteira do nutricionista que cria a consulta
+create policy consult_insert on consultations for insert with check (
+  is_admin() or (nutritionist_id = auth.uid() and exists (select 1 from patients p where p.id = patient_id and p.nutritionist_id = auth.uid())));
 create policy consult_update on consultations for update using ((nutritionist_id = auth.uid() or is_admin()) and record_state = 'draft');
 
 create policy audit_read on audit_logs for select using (is_admin());

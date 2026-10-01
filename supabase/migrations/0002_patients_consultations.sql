@@ -54,14 +54,13 @@ create policy consents_revoke on consents for update using (patient_id = auth.ui
 
 -- Auditoria automática (INSERT/UPDATE/DELETE) sem registrar texto clínico livre em logs externos
 create function audit_row() returns trigger language plpgsql security definer set search_path = public as $$
-declare pid uuid; cid uuid;
+declare r jsonb; pid uuid; cid uuid;
 begin
-  if tg_table_name = 'consultations' then pid := coalesce(new.patient_id, old.patient_id); cid := coalesce(new.id, old.id);
-  elsif tg_table_name = 'patients' then pid := coalesce(new.id, old.id);
-  else pid := coalesce(new.patient_id, old.patient_id); end if;
+  r := case when tg_op = 'DELETE' then to_jsonb(old) else to_jsonb(new) end;     -- leitura por JSON: serve a qualquer tabela
+  pid := nullif(case tg_table_name when 'patients' then r->>'id' else r->>'patient_id' end, '')::uuid;
+  cid := nullif(case tg_table_name when 'consultations' then r->>'id' else r->>'consultation_id' end, '')::uuid;
   insert into audit_logs(user_id, patient_id, consultation_id, action, entity, entity_id, old_value, new_value)
-  values (auth.uid(), pid, cid, lower(tg_op), tg_table_name,
-          coalesce(new.id::text, new.patient_id::text, old.id::text, old.patient_id::text),
+  values (auth.uid(), pid, cid, lower(tg_op), tg_table_name, coalesce(r->>'id', r->>'patient_id'),
           case when tg_op <> 'INSERT' then to_jsonb(old) end,
           case when tg_op <> 'DELETE' then to_jsonb(new) end);
   return coalesce(new, old);

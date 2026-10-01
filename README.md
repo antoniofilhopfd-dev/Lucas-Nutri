@@ -13,7 +13,8 @@ npm run dev                  # app
 npm test                     # testes unitários (lógica clínica, regras, validações)
 npm run typecheck && npm run build
 supabase db reset            # aplica supabase/migrations/0001..0011
-supabase test db             # testes de RLS (supabase/tests/rls_test.sql)
+npm run test:rls             # migrations + testes de RLS em Postgres puro (PGHOST/PGUSER definidos)
+node scripts/create-nutritionist.mjs "Lucas Bento" "CRN-6 12345" email senha   # primeiro acesso
 ```
 
 ## Estrutura
@@ -36,4 +37,6 @@ supabase test db             # testes de RLS (supabase/tests/rls_test.sql)
 - Base de alimentos: nenhuma tabela foi copiada; importar TACO ou outra base só com licença registrada.
 
 ## Estado
-Fundação, motor clínico, módulos e migrations estão implementados e testados em nível de unidade. Faltam: login real (CRN+senha; telefone+OTP), ligação das telas ao banco, transcrição de áudio com provedor, upload real de arquivos, testes E2E e execução dos testes de RLS contra um projeto Supabase.
+As 11 migrations aplicam sem erro em Postgres 16 e passam em ~60 verificações de RLS/imutabilidade (`npm run test:rls`, também no CI), mais 91 testes unitários. O login (CRN+senha; telefone+OTP) está implementado, mas ainda não foi exercitado contra um projeto Supabase real (SMS exige provedor configurado).
+
+Faltam: ligar as demais telas ao banco, transcrição de áudio com provedor, upload real de arquivos e testes E2E.
