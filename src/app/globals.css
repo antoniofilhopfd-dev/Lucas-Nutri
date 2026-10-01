@@ -1,0 +1,3 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+body { @apply bg-paper text-graphite antialiased; }
+:focus-visible { @apply outline outline-2 outline-offset-2 outline-olive; }
