@@ -22,7 +22,7 @@ describe("revisão humana", () => {
     expect(toPersist(items).map((i) => i.status)).toEqual(["confirmed", "edited"]); expect(toPersist(items)[1].value).toBe("22:30");
     expect(pendingCount([a])).toBe(1);
   });
-  it("edição vazia é rejeitada", async () => expect(() => edit((null as any) ?? { value: "x" }, "  ")).toThrow());
+  it("edição vazia é rejeitada", async () => { const [a] = await ruleBasedExtractor.extract(TXT, "text"); expect(() => edit(a, "  ")).toThrow(); });
 });
 describe("provedores plugáveis", () => {
   it("padrão local não exige consentimento externo", () => expect(getExtractor().external).toBe(false));
