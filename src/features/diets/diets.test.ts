@@ -1,0 +1,37 @@
+import { describe, it, expect } from "vitest";
+import { foodTotals, mealTotals, dayTotals } from "./nutrition";
+import { canTransition, isEditable, visibleToPatient, newVersionFrom, supersedes } from "./lifecycle";
+import { validateFoodRows } from "./food-import";
+
+const arroz = { calories: 130, protein: 2.5, carbohydrate: 28, fat: 0.2, fiber: 1.6 }; // valores de teste, não de tabela oficial
+const frango = { calories: 165, protein: 31, carbohydrate: 0, fat: 3.6, fiber: 0 };
+describe("cálculo nutricional", () => {
+  it("quantidade × composição por 100 g", () => { const t = foodTotals(frango, 150); expect(t.calories).toBeCloseTo(247.5, 10); expect(t.protein).toBeCloseTo(46.5, 10); });
+  it("refeição e dia somam", () => {
+    const m = mealTotals([{ per100: arroz, quantity: 200 }, { per100: frango, quantity: 100 }]);
+    expect(m.calories).toBeCloseTo(425, 10); expect(m.protein).toBeCloseTo(36, 10);
+    expect(dayTotals([m, m]).calories).toBeCloseTo(850, 10);
+  });
+  it("rejeita quantidade negativa", () => expect(() => foodTotals(arroz, -1)).toThrow());
+});
+describe("ciclo de vida da dieta", () => {
+  it("fluxo rascunho → revisar → finalizar → publicar", () => {
+    expect(canTransition("draft", "reviewed")).toBe(true); expect(canTransition("reviewed", "finalized")).toBe(true); expect(canTransition("finalized", "published")).toBe(true);
+    expect(canTransition("draft", "published")).toBe(false); expect(canTransition("published", "draft")).toBe(false);
+  });
+  it("imutabilidade e visibilidade", () => {
+    expect(isEditable("draft")).toBe(true); expect(isEditable("finalized")).toBe(false); expect(isEditable("published")).toBe(false);
+    expect(visibleToPatient({ status: "draft" })).toBe(false); expect(visibleToPatient({ status: "published" })).toBe(true);
+  });
+  it("alteração gera nova versão e aposenta a anterior", () => {
+    const v2 = newVersionFrom({ id: "d1", version: 1, status: "published" as const });
+    expect(v2.version).toBe(2); expect(v2.status).toBe("draft"); expect(v2.parent_id).toBe("d1"); expect(supersedes("published")).toBe("superseded");
+    expect(() => newVersionFrom({ id: "d", version: 1, status: "draft" as const })).toThrow();
+  });
+});
+describe("importação de alimentos", () => {
+  const row = { name: "Arroz (exemplo)", source: "Base X", source_version: "2026", license: "CC-BY 4.0", calories: 130, protein: 2.5, carbohydrate: 28, fat: 0.2, fiber: 1.6 };
+  it("aceita linha completa", () => expect(validateFoodRows([row]).ok).toHaveLength(1));
+  it("exige licença e fonte", () => { const r = validateFoodRows([{ ...row, license: "" }, { ...row, source: "" }]); expect(r.ok).toHaveLength(0); expect(r.errors).toHaveLength(2); });
+  it("rejeita macros impossíveis", () => expect(validateFoodRows([{ ...row, protein: 60, carbohydrate: 60 }]).errors[0].message).toMatch(/100 g/));
+});

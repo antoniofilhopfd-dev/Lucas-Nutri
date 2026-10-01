@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-const NAV = [["Dashboard", "/nutri"], ["Pacientes", "/nutri/pacientes"], ["Consultas", "/nutri/consultas"], ["Avaliação", "/nutri/avaliacao"], ["Energia", "/nutri/energia"], ["Fotometria", "/nutri/fotometria"]] as const;
+const NAV = [["Dashboard", "/nutri"], ["Pacientes", "/nutri/pacientes"], ["Consultas", "/nutri/consultas"], ["Avaliação", "/nutri/avaliacao"], ["Energia", "/nutri/energia"], ["Fotometria", "/nutri/fotometria"], ["Anamnese", "/nutri/anamnese"], ["Dietas", "/nutri/dietas"]] as const;
 export default function NutriLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto grid max-w-6xl gap-6 p-4 md:grid-cols-[200px_1fr]">
