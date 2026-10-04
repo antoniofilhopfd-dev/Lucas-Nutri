@@ -2,7 +2,6 @@
 import { withSession, fail } from "@/lib/actions/helpers";
 import { buildDiet, buildDietMeal, buildDietFood } from "@/lib/db/rows";
 import { canTransition, type DietStatus } from "./lifecycle";
-import { validateFoodRows } from "./food-import";
 
 export async function createDiet(patientId: string, consultationId: string, meals: { name: string; time: string | null; notes?: string; foods: { foodId: string; quantity: number; household?: string }[] }[], vetKcal?: number, notes?: string) {
   if (!meals.length) return { ok: false as const, message: "Adicione ao menos uma refeição." };
@@ -23,16 +22,5 @@ export async function advanceDiet(id: string, from: DietStatus, to: Exclude<Diet
   return withSession(async (sb) => {
     const { error } = to === "published" ? await sb.rpc("publish_diet", { p_id: id }) : await sb.from("diets").update({ status: to }).eq("id", id);
     return error ? fail(error, "advanceDiet") : { ok: true as const };
-  });
-}
-
-/** Importa a base de alimentos (linhas já validadas por validateFoodRows). Só administradores gravam: o RLS recusa os demais. */
-export async function importFoods(rows: Record<string, unknown>[]) {
-  const { ok, errors } = validateFoodRows(rows);
-  if (errors.length || !ok.length) return { ok: false as const, message: "Corrija as linhas de alimentos antes de importar." };
-  return withSession<{ count: number }>(async (sb) => {
-    const { error } = await sb.from("food_database").upsert(ok, { onConflict: "name,source,source_version" });
-    if (error) return { ok: false, message: "Não foi possível importar os alimentos (apenas administradores podem alterar a base)." };
-    return { ok: true, count: ok.length };
   });
 }

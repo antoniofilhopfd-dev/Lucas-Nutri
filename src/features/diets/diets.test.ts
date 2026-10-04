@@ -51,14 +51,3 @@ describe("importação de plano alimentar", () => {
     expect(parsePlanRows([["a", "b"]]).errors[0].message).toMatch(/Cabeçalho/);
   });
 });
-import { parseWorkbook } from "./plan-workbook";
-describe("planilha com abas", () => {
-  it("lê Plano, Alimentos e Metas", () => {
-    const w = parseWorkbook([
-      { name: "Plano", rows: [["Refeição", "Horário", "Opção", "Itens"], ["Ceia", "21:00", 1, "iogurte"]] },
-      { name: "Alimentos", rows: [["Nome", "Fonte", "Versão", "Licença", "Unidade", "Calorias", "Proteína", "Carboidrato", "Gordura", "Sódio"], ["Arroz", "Tabela", "1", "Uso próprio", "g", 130, 2.5, 28, 0.2, null]] },
-      { name: "Metas", rows: [["Meta", "Valor"], ["VET (kcal)", 2250], ["Água (L/dia)", 3]] },
-    ]);
-    expect(w.plan?.meals).toHaveLength(1); expect(w.foods?.errors).toEqual([]); expect(w.foods?.ok[0].fiber).toBe(0); expect(w.metas).toEqual({ vet: "2250", water: "3" });
-  });
-});

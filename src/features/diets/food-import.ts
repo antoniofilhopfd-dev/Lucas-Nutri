@@ -5,7 +5,7 @@ export const foodRowSchema = z.object({
   license: z.string().trim().min(2, "Informe a licença/permissão de uso"),
   serving_unit: z.enum(["g", "ml"]).default("g"),
   calories: z.coerce.number().min(0).max(950), protein: z.coerce.number().min(0).max(100), carbohydrate: z.coerce.number().min(0).max(100),
-  fat: z.coerce.number().min(0).max(100), fiber: z.coerce.number().min(0).max(100).default(0), sodium: z.coerce.number().min(0).optional(),
+  fat: z.coerce.number().min(0).max(100), fiber: z.coerce.number().min(0).max(100), sodium: z.coerce.number().min(0).optional(),
 }).refine((r) => r.protein + r.carbohydrate + r.fat <= 100.5, { message: "Macros somam mais de 100 g por 100 g" });
 export function validateFoodRows(rows: unknown[]) {
   const ok: z.infer<typeof foodRowSchema>[] = []; const errors: { row: number; message: string }[] = [];
