@@ -69,5 +69,5 @@ export const buildAnamnesis = (patientId: string, consultationId: string, o: { r
 export const buildDiet = (patientId: string, consultationId: string, o: { vetKcal?: number; notes?: string; version?: number; parentId?: string }) => ({
   patient_id: patientId, consultation_id: consultationId, version: o.version ?? 1, parent_id: o.parentId ?? null, status: "draft" as const, notes: o.notes ?? null, vet_kcal: o.vetKcal ?? null,
 });
-export const buildDietMeal = (dietId: string, name: string, time: string | null, position: number) => ({ diet_id: dietId, name, meal_time: time, position });
+export const buildDietMeal = (dietId: string, name: string, time: string | null, position: number, notes?: string) => ({ diet_id: dietId, name, meal_time: time, position, notes: notes ?? null });
 export const buildDietFood = (mealId: string, foodId: string, quantity: number, household?: string) => ({ meal_id: mealId, food_id: foodId, quantity, household_measure: household ?? null });

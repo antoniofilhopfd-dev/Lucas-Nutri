@@ -40,7 +40,7 @@ describe("contrato linha ↔ schema", () => {
     items.forEach((r) => conforms("anamnesis_items", r));
   });
   it("dieta", () => {
-    conforms("diets", R.buildDiet(P, CO, { vetKcal: 1900 })); conforms("diet_meals", R.buildDietMeal(A, "Almoço", "12:30", 1)); conforms("diet_foods", R.buildDietFood(A, CO, 150, "1 filé"));
+    conforms("diets", R.buildDiet(P, CO, { vetKcal: 1900 })); conforms("diet_meals", R.buildDietMeal(A, "Almoço", "12:30", 1, "150g arroz")); conforms("diet_foods", R.buildDietFood(A, CO, 150, "1 filé"));
   });
   it("o schema gerado tem as tabelas esperadas", () => { for (const t of ["patients", "consultations", "diets", "community_posts", "messages", "body_photos"]) expect(C[t]).toBeTruthy(); });
 });
