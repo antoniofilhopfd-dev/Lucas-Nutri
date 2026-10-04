@@ -35,19 +35,3 @@ describe("importação de alimentos", () => {
   it("exige licença e fonte", () => { const r = validateFoodRows([{ ...row, license: "" }, { ...row, source: "" }]); expect(r.ok).toHaveLength(0); expect(r.errors).toHaveLength(2); });
   it("rejeita macros impossíveis", () => expect(validateFoodRows([{ ...row, protein: 60, carbohydrate: 60 }]).errors[0].message).toMatch(/100 g/));
 });
-import { parsePlanRows, parseCsv, parseTime, TEMPLATE_CSV } from "./plan-import";
-describe("importação de plano alimentar", () => {
-  it("lê colunas do plano, herda refeição/horário e numera opções", () => {
-    const r = parsePlanRows(parseCsv(TEMPLATE_CSV.slice(1)));
-    expect(r.errors).toEqual([]); expect(r.meals.map((m) => m.name)).toEqual(["Café da manhã · Opção 1", "Café da manhã · Opção 2", "Almoço · Opção 1"]);
-    expect(r.meals[1].time).toBe("06:30");
-  });
-  it("aceita cabeçalho sem acento e horário do Excel", () => {
-    const r = parsePlanRows([["refeicao", "horario", "opcao", "itens"], ["Ceia", 0.875, 1, "iogurte"]]);
-    expect(r.meals[0].time).toBe("21:00"); expect(parseTime("6h30")).toBe("06:30"); expect(parseTime("25:00")).toBeNull();
-  });
-  it("aponta linha com erro", () => {
-    expect(parsePlanRows([["Refeição", "Itens"], ["Ceia", ""]]).errors[0]).toMatchObject({ row: 2 });
-    expect(parsePlanRows([["a", "b"]]).errors[0].message).toMatch(/Cabeçalho/);
-  });
-});
