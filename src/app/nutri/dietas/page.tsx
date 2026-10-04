@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { foodTotals, mealTotals, dayTotals, type Per100 } from "@/features/diets/nutrition";
 import { canTransition, isEditable, type DietStatus } from "@/features/diets/lifecycle";
 
@@ -13,11 +14,12 @@ export default function Dietas() {
   const next: DietStatus[] = ["reviewed", "finalized", "published"];
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Dieta <span className="text-base text-graphite/60">· {status}</span></h1>
+      <div className="flex items-center justify-between"><h1 className="text-2xl font-semibold">Dieta <span className="text-base text-graphite/60">· {status}</span></h1>
+        <Link href="/nutri/dietas/importar" className="rounded-lg bg-olive px-4 py-2 text-white">Importar planilha</Link></div>
       {Object.keys(FOODS).map((n) => <label key={n} className="block">{n} (g)
         <input type="number" disabled={!isEditable(status)} className="ml-2 w-24 rounded border border-mist p-1" value={qty[n]} onChange={(e) => setQty({ ...qty, [n]: Number(e.target.value) })} />
         <span className="ml-2 text-sm text-graphite/60">{Math.round(foodTotals(FOODS[n], qty[n]).calories)} kcal</span></label>)}
-      <p>Almoço: {Math.round(meal.calories)} kcal · P {meal.protein.toFixed(1)} g · C {meal.carbohydrate.toFixed(1)} g · G {meal.fat.toFixed(1)} g · Fibra {meal.fiber.toFixed(1)} g</p>
+      <p>Almoço: {Math.round(meal.calories)} kcal · P {meal.protein.toFixed(1)} g · C {meal.carbohydrate.toFixed(1)} g · G {meal.fat.toFixed(1)} g</p>
       <p>Dia: {Math.round(day.calories)} kcal</p>
       {next.filter((s) => canTransition(status, s)).map((s) => <button key={s} className="rounded-lg bg-olive px-4 py-2 text-white" onClick={() => setStatus(s)}>Avançar para {s}</button>)}
     </section>
