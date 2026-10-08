@@ -11,25 +11,27 @@ Há dois cenários bem diferentes. Hoje só o **A** está pronto.
 
 ---
 
-## A. Protótipo para o cliente (≈ 10 minutos)
+## A. Protótipo para o cliente, sempre puxando do GitHub
 
-Arquivo pronto: `bentonutrisync-prototipo-hostinger.zip` (ou a pasta `prototype/hostinger/`). Contém `index.html`, `favicon.png`, `robots.txt` e `.htaccess`.
+Como funciona: a cada push que altera o protótipo, o GitHub Actions (`.github/workflows/deploy-hostinger.yml`) gera o site e o publica na branch **`deploy-hostinger`**, que contém **só** os arquivos do site (`index.html`, `favicon.png`, `robots.txt`, `.htaccess`). A Hostinger acompanha essa branch e faz o pull sozinha. Assim o código-fonte, as migrations e os documentos nunca ficam dentro da pasta pública.
 
-**Recomendado: usar um subdomínio** (ex.: `demo.seudominio.com.br`), para não substituir o site principal.
+**Configuração única na Hostinger** (os nomes dos menus podem variar um pouco conforme o plano):
+1. **Subdomínio:** hPanel → Domínios → Subdomínios → criar `demo` (ex.: `demo.seudominio.com.br`). Deixe a pasta do subdomínio **vazia**.
+2. **Git:** hPanel → **Avançado → Git** → criar repositório:
+   - *Repositório:* `https://github.com/antoniofilhopfd-dev/Lucas-Nutri.git` (se o repositório for **privado**, use o endereço SSH `git@github.com:antoniofilhopfd-dev/Lucas-Nutri.git`; a Hostinger mostra uma **chave pública**: cadastre-a no GitHub em *Settings → Deploy keys*, só leitura).
+   - *Branch:* `deploy-hostinger`
+   - *Diretório:* a pasta do subdomínio (ex.: `public_html/demo`).
+3. Clique em **Implantar/Deploy** uma vez para o primeiro pull.
+4. **Atualização automática:** a Hostinger mostra uma **URL de webhook** (*Auto Deployment*). No GitHub: *Settings → Webhooks → Add webhook*, cole a URL, *Content type* `application/json`, evento **Just the push event**. Daí em diante, cada push dispara o pull.
+5. Ative o **SSL** do subdomínio (o `.htaccess` já redireciona HTTP para HTTPS) e teste.
 
-1. No hPanel: **Domínios → Subdomínios** → criar `demo` (a Hostinger cria a pasta, normalmente `public_html/demo`).
-2. **Arquivos → Gerenciador de arquivos** → abra a pasta do subdomínio.
-3. **Enviar** o `.zip` e **extrair** ali (use "Extrair"/"Descompactar"). Confira que `index.html` e `.htaccess` ficaram direto na pasta, não dentro de outra subpasta. O `.htaccess` é um arquivo oculto: ative "mostrar arquivos ocultos" para vê-lo.
-4. Ative o **SSL** do subdomínio (hPanel → Segurança → SSL). O `.htaccess` já redireciona HTTP para HTTPS.
-5. Abra `https://demo.seudominio.com.br` e teste: login, menu do nutricionista, abas do prontuário e a visão do paciente no celular.
+**Rotina depois disso:** você (ou o Claude) faz push para a branch de trabalho → o Actions atualiza `deploy-hostinger` → o webhook faz a Hostinger puxar → o site muda em cerca de 1 a 2 minutos. Para forçar manualmente: GitHub → Actions → "Publicar protótipo" → *Run workflow*.
 
-**O que o pacote já faz:** HTTPS forçado, bloqueio de buscadores (`noindex` + `robots.txt`), compressão e cabeçalhos de segurança básicos, sem listar pastas.
+**Proteger com senha:** o protótipo é demonstração. Use a proteção de diretório do hPanel, se o seu plano tiver, ou descomente o bloco "Senha opcional" no `.htaccess` (`prototype/hostinger/.htaccess`).
 
-**Proteger com senha** (recomendado, já que é demonstração): no hPanel procure a opção de *proteção de diretório por senha* (o nome e a disponibilidade variam conforme o plano). Se não existir, descomente o bloco "Senha opcional" no `.htaccess` e crie um `.htpasswd` fora da pasta pública.
+**Alternativa sem Git:** enviar `bentonutrisync-prototipo-hostinger.zip` pelo Gerenciador de arquivos e extrair na pasta do subdomínio.
 
-**Atualizar depois:** edite `prototype/src/`, rode `python3 prototype/build.py` e envie de novo `prototype/hostinger/index.html`.
-
-**Observação:** o protótipo carrega as fontes (Montserrat e Roboto Condensed) do Google Fonts. Sem internet no aparelho do cliente, cai numa fonte padrão, sem quebrar o layout.
+**Observação:** o protótipo carrega as fontes do Google Fonts; sem internet no aparelho, cai numa fonte padrão, sem quebrar o layout.
 
 ---
 

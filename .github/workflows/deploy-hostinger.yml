@@ -1,0 +1,41 @@
+name: Publicar protótipo (branch deploy-hostinger)
+# A cada push que mexe no protótipo, gera a pasta do site e a publica na branch `deploy-hostinger`.
+# A Hostinger (hPanel → Avançado → Git) acompanha essa branch e faz o pull automaticamente.
+on:
+  push:
+    branches: [main, claude/bentonutrisync-saas-dev-pwzovg]
+    paths:
+      - "prototype/**"
+      - "public/brand/**"
+      - ".github/workflows/deploy-hostinger.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gerar o site
+        run: python3 prototype/build.py
+      - name: Publicar na branch deploy-hostinger
+        run: |
+          set -euo pipefail
+          SITE="$RUNNER_TEMP/site"
+          mkdir -p "$SITE"
+          cp -a prototype/hostinger/. "$SITE/"
+          test -f "$SITE/index.html" && test -f "$SITE/.htaccess"
+          cd "$SITE"
+          git init -q -b deploy-hostinger
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy do protótipo a partir de ${GITHUB_SHA::7}"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push -f origin deploy-hostinger
