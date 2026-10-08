@@ -3,7 +3,10 @@ import { createServerClient } from "@supabase/ssr";
 // Protege /nutri e /paciente: sem sessão → 401 redirect; papel errado → /acesso-negado.
 export async function middleware(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return NextResponse.next();
+  // Sem Supabase configurado (ou em modo demonstração) as áreas protegidas ficam FECHADAS em produção.
+  if (!url || !key || process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+    return process.env.NODE_ENV === "production" ? NextResponse.redirect(new URL("/demo", req.url)) : NextResponse.next();
+  }
   let res = NextResponse.next({ request: req });
   const sb = createServerClient(url, key, { cookies: {
     getAll: () => req.cookies.getAll(),

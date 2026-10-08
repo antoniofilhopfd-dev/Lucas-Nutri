@@ -11,6 +11,36 @@ Há dois cenários bem diferentes. Hoje só o **A** está pronto.
 
 ---
 
+## Node.js na Hostinger (assistente "Node.js web app" a partir do GitHub)
+
+Foi o caminho que você abriu no hPanel. Funciona hoje em **modo demonstração**: o site mostra o protótipo, sem Supabase.
+
+**Preencha assim**
+| Campo | Valor |
+|---|---|
+| Repositório / branch | `antoniofilhopfd-dev/Lucas-Nutri` · branch `claude/bentonutrisync-saas-dev-pwzovg` (depois, a branch oficial) |
+| Comando de construção | `npm run build` |
+| Gerenciador de pacotes | `npm` |
+| Diretório de saída | `.next` |
+| Comando de início | `npm start` |
+| Node.js | 20 ou 22 |
+
+**Variáveis de ambiente** (a Hostinger não deixa continuar com valor vazio; use estes valores temporários):
+| Chave | Valor agora |
+|---|---|
+| `NEXT_PUBLIC_DEMO_MODE` | `true` |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://exemplo.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `pendente` |
+| `SUPABASE_SERVICE_ROLE_KEY` | `pendente` |
+
+Com `NEXT_PUBLIC_DEMO_MODE=true`, o endereço principal (`/`) e `/demo` abrem o protótipo, e `/nutri` e `/paciente` redirecionam para a demonstração (ficam **fechadas** até o Supabase existir). Os valores `exemplo` e `pendente` não são chaves reais.
+
+**Quando o Supabase estiver pronto:** troque as três variáveis pelos valores reais, **apague** `NEXT_PUBLIC_DEMO_MODE` (ou ponha `false`) e **refaça o build** (variáveis `NEXT_PUBLIC_*` entram no código na hora do build). Nunca cole a `SUPABASE_SERVICE_ROLE_KEY` em chat, e-mail ou no GitHub: só no painel da Hostinger.
+
+**Atualização automática:** deixe ligada a opção de implantar a cada push no GitHub (ou use o webhook do hPanel). A cada push, a Hostinger refaz o build e o protótipo atualizado entra no ar.
+
+---
+
 ## A. Protótipo para o cliente, sempre puxando do GitHub
 
 Como funciona: a cada push que altera o protótipo, o GitHub Actions (`.github/workflows/deploy-hostinger.yml`) gera o site e o publica na branch **`deploy-hostinger`**, que contém **só** os arquivos do site (`index.html`, `favicon.png`, `robots.txt`, `.htaccess`). A Hostinger acompanha essa branch e faz o pull sozinha. Assim o código-fonte, as migrations e os documentos nunca ficam dentro da pasta pública.

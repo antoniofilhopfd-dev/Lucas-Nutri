@@ -15,4 +15,8 @@ out = here + 'hostinger/'
 os.makedirs(out, exist_ok=True)
 shutil.copy(here + 'index.html', out + 'index.html')
 shutil.copy(brand + 'logo-mark.png', out + 'favicon.png')
+demo = here + '../public/demo/'
+os.makedirs(demo, exist_ok=True)
+shutil.copy(here + 'index.html', demo + 'index.html')
+shutil.copy(brand + 'logo-mark.png', demo + 'favicon.png')
 print('ok', len(html))
