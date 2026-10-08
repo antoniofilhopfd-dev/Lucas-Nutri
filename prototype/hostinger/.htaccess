@@ -2,10 +2,11 @@
 DirectoryIndex index.html
 Options -Indexes
 
-# Força HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# Redirecionar HTTP para HTTPS: DESCOMENTE só depois que o SSL do domínio estiver ativo
+# (em endereço temporário ou domínio ainda sem certificado, isso causaria erro de acesso).
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
 # O protótipo é de demonstração: não deve aparecer em buscadores
 <IfModule mod_headers.c>

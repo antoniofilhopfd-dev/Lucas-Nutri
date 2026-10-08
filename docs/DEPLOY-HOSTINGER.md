@@ -15,15 +15,21 @@ Há dois cenários bem diferentes. Hoje só o **A** está pronto.
 
 Como funciona: a cada push que altera o protótipo, o GitHub Actions (`.github/workflows/deploy-hostinger.yml`) gera o site e o publica na branch **`deploy-hostinger`**, que contém **só** os arquivos do site (`index.html`, `favicon.png`, `robots.txt`, `.htaccess`). A Hostinger acompanha essa branch e faz o pull sozinha. Assim o código-fonte, as migrations e os documentos nunca ficam dentro da pasta pública.
 
+**Ainda sem domínio? Tudo bem.** A Hostinger entrega um **endereço temporário** do seu site (algo como `https://nome-aleatorio.hostingersite.com`; aparece no hPanel, no painel do site, como domínio temporário ou prévia do site). Use esse endereço agora e troque pelo domínio quando ele estiver registrado e apontado. O protótipo não depende do nome do domínio: usa só caminhos relativos.
+
 **Configuração única na Hostinger** (os nomes dos menus podem variar um pouco conforme o plano):
-1. **Subdomínio:** hPanel → Domínios → Subdomínios → criar `demo` (ex.: `demo.seudominio.com.br`). Deixe a pasta do subdomínio **vazia**.
+1. **Escolha onde o site vai ficar:**
+   - *Sem domínio ainda:* use a pasta `public_html` do site com o endereço temporário. Ela costuma vir com um arquivo de exemplo (por exemplo `default.php`): **apague** antes, porque o Git precisa de uma pasta vazia.
+   - *Com domínio depois:* crie o subdomínio `demo` (ex.: `demo.seudominio.com.br`) com a pasta vazia e repita o passo 2 apontando para ela, ou simplesmente associe o domínio ao mesmo site.
 2. **Git:** hPanel → **Avançado → Git** → criar repositório:
-   - *Repositório:* `https://github.com/antoniofilhopfd-dev/Lucas-Nutri.git` (se o repositório for **privado**, use o endereço SSH `git@github.com:antoniofilhopfd-dev/Lucas-Nutri.git`; a Hostinger mostra uma **chave pública**: cadastre-a no GitHub em *Settings → Deploy keys*, só leitura).
+   - *Repositório:* `https://github.com/antoniofilhopfd-dev/Lucas-Nutri.git` (o repositório é público, não precisa de chave).
    - *Branch:* `deploy-hostinger`
-   - *Diretório:* a pasta do subdomínio (ex.: `public_html/demo`).
-3. Clique em **Implantar/Deploy** uma vez para o primeiro pull.
+   - *Diretório:* `public_html` (ou a pasta do subdomínio).
+3. Clique em **Implantar/Deploy** para o primeiro pull e abra o endereço temporário para conferir.
 4. **Atualização automática:** a Hostinger mostra uma **URL de webhook** (*Auto Deployment*). No GitHub: *Settings → Webhooks → Add webhook*, cole a URL, *Content type* `application/json`, evento **Just the push event**. Daí em diante, cada push dispara o pull.
-5. Ative o **SSL** do subdomínio (o `.htaccess` já redireciona HTTP para HTTPS) e teste.
+5. **SSL e HTTPS:** quando o certificado do endereço/domínio estiver ativo, descomente o bloco de redirecionamento HTTPS no `.htaccess` (`prototype/hostinger/.htaccess`). Até lá, o site abre normalmente pelo endereço que a Hostinger indicar.
+
+**Quando o domínio ficar pronto:** registre/aponte o domínio no hPanel (Domínios), associe-o ao mesmo site (ou crie o subdomínio e refaça o passo 2 nele), ative o SSL e descomente o redirecionamento HTTPS. Não é preciso mexer no GitHub nem no código.
 
 **Rotina depois disso:** você (ou o Claude) faz push para a branch de trabalho → o Actions atualiza `deploy-hostinger` → o webhook faz a Hostinger puxar → o site muda em cerca de 1 a 2 minutos. Para forçar manualmente: GitHub → Actions → "Publicar protótipo" → *Run workflow*.
 
