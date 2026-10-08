@@ -93,7 +93,7 @@ Como funciona: a cada push que altera o protótipo, o GitHub Actions (`.github/w
 
 **Passos**
 1. Fazer o deploy; as tabelas são criadas sozinhas no primeiro acesso.
-2. No SSH da Hostinger, na pasta do app: `npm run auth:criar-nutri -- "Lucas Bento" "CRN-… " email` (pede a senha).
+2. Defina a variável `SETUP_TOKEN` (um código seu), reimplante e abra `/instalar`: informe o código, nome, CRN, e-mail e senha. A página só existe até o primeiro cadastro (depois dá 404); remova a variável em seguida. (Alternativa com terminal: `npm run auth:criar-nutri`.)
 3. Remover `NEXT_PUBLIC_DEMO_MODE` e reimplantar.
 4. Apontar o domínio e ativar o SSL; atualizar `APP_URL`.
 5. Testar: cadastrar paciente → gerar código de acesso → paciente entra em `/login`.
