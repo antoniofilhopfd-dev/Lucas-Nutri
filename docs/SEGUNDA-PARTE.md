@@ -4,11 +4,11 @@ A parte visual está fechada: `prototype/index.html` (abre direto no navegador, 
 Este documento lista o que falta para ligar tudo a dados reais.
 
 ## 1. Infraestrutura (pré-requisitos)
-- [ ] Criar o projeto Supabase e preencher `.env.local` (URL, chave pública, service role).
-- [ ] Rodar `supabase db push` com as migrations `0001`–`0011`.
-- [ ] Configurar provedor de SMS (login do paciente por código).
-- [ ] Criar o primeiro nutricionista: `node scripts/create-nutritionist.mjs`.
-- [ ] Rodar `npm run test:rls` contra o banco real (já passa em Postgres puro).
+- [ ] Criar o banco MySQL na Hostinger e preencher `MYSQL_URL`, `SESSION_SECRET`, `APP_URL`, `STORAGE_DIR`.
+- [x] Migrations 001–006 (aplicam sozinhas no start).
+- [ ] (Opcional) provedor de SMS via `SMS_WEBHOOK_URL`; sem ele o código é enviado pelo nutricionista por WhatsApp.
+- [ ] Criar o primeiro nutricionista: `npm run auth:criar-nutri`.
+- [x] `npm run test:acesso` (precisa de `TEST_MYSQL_URL`; já passa em MariaDB 10.11).
 
 ## 2. Ligar as telas ao banco
 O contrato linha ↔ schema já está testado (`src/lib/db/rows.test.ts`) e as ações de servidor existem em `src/features/*/actions.ts`.

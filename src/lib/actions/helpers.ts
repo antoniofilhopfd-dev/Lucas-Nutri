@@ -1,12 +1,19 @@
-import { supabaseServer } from "@/lib/supabase/server";
+import { actorAtual } from "@/server/auth";
+import { AcessoNegado, type Actor } from "@/server/authz";
+import { RegraNegocio } from "@/server/sql";
+
 export type Result<T = unknown> = ({ ok: true } & T) | { ok: false; message: string };
 export const SAVE_ERROR = "Não foi possível salvar. Tente novamente.";
-/** Sessão obrigatória; detalhes técnicos só no log do servidor, nunca para o usuário. */
-export async function withSession<T>(fn: (sb: Awaited<ReturnType<typeof supabaseServer>>, userId: string) => Promise<Result<T>>): Promise<Result<T>> {
+
+/** Sessão obrigatória. Erros de regra viram mensagem clara; detalhes técnicos só no log do servidor. */
+export async function comAtor<T>(fn: (a: Actor) => Promise<T>): Promise<Result<T extends object ? T : { value: T }>> {
   try {
-    const sb = await supabaseServer(); const { data: { user } } = await sb.auth.getUser();
-    if (!user) return { ok: false, message: "Faça login para continuar." };
-    return await fn(sb, user.id);
-  } catch (e) { console.error("action", e); return { ok: false, message: SAVE_ERROR }; }
+    const r = await fn(await actorAtual());
+    return ({ ok: true, ...(r !== null && typeof r === "object" ? r : { value: r }) }) as never;
+  } catch (e) {
+    if (e instanceof AcessoNegado) return { ok: false, message: e.message === "Acesso negado." ? "Você não tem acesso a este recurso." : e.message };
+    if (e instanceof RegraNegocio) return { ok: false, message: e.message };
+    console.error("action", e);
+    return { ok: false, message: SAVE_ERROR };
+  }
 }
-export const fail = (e: unknown, ctx: string): Result<never> => { console.error(ctx, e); return { ok: false, message: SAVE_ERROR }; };

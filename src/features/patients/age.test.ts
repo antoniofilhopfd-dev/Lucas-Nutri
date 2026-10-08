@@ -38,7 +38,7 @@ describe("consulta", () => {
 import { normalizeCrn, nutritionistLoginSchema, otpSchema, GENERIC_LOGIN_ERROR } from "../auth/schemas";
 describe("login", () => {
   it("normaliza o CRN", () => expect(normalizeCrn("  crn-6   12345 ")).toBe("CRN-6 12345"));
-  it("valida o formulário do nutricionista", () => { expect(nutritionistLoginSchema.safeParse({ crn: "CRN-6 1", password: "12345678" }).success).toBe(true); expect(nutritionistLoginSchema.safeParse({ crn: "", password: "12345678" }).success).toBe(false); expect(nutritionistLoginSchema.safeParse({ crn: "CRN-6 1", password: "123" }).success).toBe(false); });
+  it("valida o formulário do nutricionista", () => { expect(nutritionistLoginSchema.safeParse({ identifier: "CRN-6 1", password: "12345678" }).success).toBe(true); expect(nutritionistLoginSchema.safeParse({ identifier: "", password: "12345678" }).success).toBe(false); expect(nutritionistLoginSchema.safeParse({ identifier: "CRN-6 1", password: "123" }).success).toBe(false); });
   it("OTP: telefone E.164 e código de 6 dígitos", () => { const r = otpSchema.parse({ phone: "(83) 99123-8792", token: "123456" }); expect(r.phone).toBe("+5583991238792"); expect(otpSchema.safeParse({ phone: "83991238792", token: "12345" }).success).toBe(false); });
-  it("mensagem de erro não revela se o CRN existe", () => expect(GENERIC_LOGIN_ERROR).toBe("CRN ou senha inválidos."));
+  it("mensagem de erro não revela se o CRN existe", () => expect(GENERIC_LOGIN_ERROR).toBe("CRN/e-mail ou senha inválidos."));
 });

@@ -1,3 +1,4 @@
+export const smsConfigurado = () => !!process.env.SMS_WEBHOOK_URL;
 /** Envio do código do paciente. SMS_WEBHOOK_URL (qualquer provedor via HTTP) ou, sem ele, entrega manual pelo nutricionista (WhatsApp). */
 export async function enviarCodigo(telefoneE164: string, codigo: string): Promise<"enviado" | "manual"> {
   const url = process.env.SMS_WEBHOOK_URL;

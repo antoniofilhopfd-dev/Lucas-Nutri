@@ -1,16 +1,15 @@
-import { EvolutionChart } from "@/components/EvolutionChart";
-import { change } from "@/features/analytics/series";
-import { buildAlerts, sortAlerts } from "@/features/analytics/alerts";
+import { exigirUsuario } from "@/server/auth";
+import { painel } from "@/server/services/painel";
 
-// Dados de exemplo; em produção vêm de nutritionist_dashboard() e das views com RLS.
-const weight = [{ date: "11/08", value: 68.4 }, { date: "20/09", value: 67.5 }, { date: "11/10", value: 66.9 }];
-export default function Dashboard() {
-  const c = change(weight)!;
-  const alerts = sortAlerts(buildAlerts({ id: "1", name: "Joana Alves", lastRecordAt: new Date(Date.now() - 80 * 3.6e6), adherence7d: 41 }));
+export const dynamic = "force-dynamic";
+export default async function Dashboard() {
+  const u = await exigirUsuario(["nutritionist", "admin"]);
+  const n = await painel({ id: u.id, papel: u.papel });
+  const cards = [["Pacientes ativos", n.pacientesAtivos], ["Check-ins hoje", n.checkinsHoje], ["Sem registro há mais de 48 h", n.semRegistro48h], ["Consultas hoje", n.consultasHoje]] as const;
   return (
     <section className="space-y-4"><h1 className="text-2xl font-semibold">Dashboard</h1>
-      <EvolutionChart data={weight} label="Peso" unit="kg" />
-      <p>Variação: {c.abs.toFixed(1)} kg ({c.pct?.toFixed(1)}%)</p>
-      <ul>{alerts.map((a) => <li key={a.code} className={a.severity === "critical" ? "text-red-700" : "text-amber-700"}>{a.message}</li>)}</ul></section>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{cards.map(([t, v]) => <div key={t} className="rounded-xl border border-mist bg-white p-4"><div className="text-xs uppercase tracking-wide text-graphite/60">{t}</div><div className="mt-1 text-3xl font-extrabold tabular-nums">{v}</div></div>)}</div>
+      {n.pacientesAtivos === 0 && <p className="text-graphite/70">Nenhum paciente ainda. Cadastre o primeiro em Pacientes para começar.</p>}
+    </section>
   );
 }

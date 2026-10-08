@@ -5,7 +5,7 @@ Há dois cenários bem diferentes. Hoje só o **A** está pronto.
 | | O que sobe | Plano de hospedagem necessário | Pronto? |
 |---|---|---|---|
 | **A. Protótipo** | 1 arquivo HTML estático (dados fictícios) | Qualquer plano de hospedagem web (Apache) | Sim |
-| **B. App completo** | Next.js + Supabase (dados reais) | Hospedagem com **Node.js** (Business/Cloud) ou **VPS**, mais um projeto Supabase | Não: depende da segunda parte |
+| **B. App completo** | Next.js + MySQL da Hostinger (dados reais) | Hospedagem com **Node.js** (Business/Cloud) ou **VPS**, mais o banco MySQL do plano | Não: depende da segunda parte |
 
 > O app completo usa *server actions* e *middleware* do Next.js, então **não** funciona em hospedagem só de arquivos estáticos/PHP.
 
@@ -85,19 +85,15 @@ Como funciona: a cada push que altera o protótipo, o GitHub Actions (`.github/w
 
 ## B. App completo (para quando a segunda parte estiver pronta)
 
-**Antes de contratar/ajustar a hospedagem**
-1. Plano com **Node.js** (Hostinger: Business/Cloud com "Node.js web apps") **ou VPS**. Confirme na página do plano que há suporte a Next.js.
-2. Projeto **Supabase** (recomendo a região **São Paulo**, por LGPD e latência). É lá que ficam banco, login e fotos privadas.
-3. Provedor de **SMS** configurado no Supabase (login do paciente por código).
+**Antes**
+1. Plano com **Node.js** (Business/Cloud) e um banco **MySQL** criado no hPanel.
+2. Em *Criar site → Node.js Web App*: repositório do GitHub, branch `claude/bentonutrisync-saas-dev-pwzovg` (depois a principal), build `npm run build`, saída `.next`, início `npm start`, Node 22.
 
-**Variáveis de ambiente** (no painel da Hostinger, nunca no repositório): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. A chave `service_role` só no servidor.
+**Variáveis de ambiente** (no painel, nunca no repositório): `MYSQL_URL` (`mysql://usuario:senha@localhost:3306/banco`), `SESSION_SECRET` (texto longo aleatório gerado por você), `APP_URL` (endereço do site), `STORAGE_DIR` (pasta fora do site para fotos) e, opcionalmente, `SMS_WEBHOOK_URL`/`SMS_WEBHOOK_TOKEN`. Enquanto estiver só mostrando ao cliente, use também `NEXT_PUBLIC_DEMO_MODE=true` (serve o protótipo).
 
 **Passos**
-1. `supabase db push` (aplica as migrations `0001`–`0011`) e rodar `npm run test:rls` contra o banco.
-2. `node scripts/create-nutritionist.mjs "Lucas Bento" "CRN-… " email senha` para criar o primeiro acesso.
-3. Na Hostinger: criar a aplicação Node.js a partir do repositório do GitHub (branch principal), comando de build `npm ci && npm run build`, comando de início `npm start`.
-4. No Supabase, em Authentication → URL, cadastrar o domínio final como *Site URL* e *Redirect URL*.
-5. Apontar o domínio (ex.: `app.seudominio.com.br`) para a aplicação e ativar o SSL.
-6. Testar o fluxo completo (cadastrar paciente → consulta → avaliação → dieta → publicar → paciente acessa).
-
-**Antes de usar com pacientes reais:** revisão científica das equações bloqueadas, textos legais/LGPD, backup do banco e monitoramento de erros (ver `docs/SEGUNDA-PARTE.md`).
+1. Fazer o deploy; as tabelas são criadas sozinhas no primeiro acesso.
+2. No SSH da Hostinger, na pasta do app: `npm run auth:criar-nutri -- "Lucas Bento" "CRN-… " email` (pede a senha).
+3. Remover `NEXT_PUBLIC_DEMO_MODE` e reimplantar.
+4. Apontar o domínio e ativar o SSL; atualizar `APP_URL`.
+5. Testar: cadastrar paciente → gerar código de acesso → paciente entra em `/login`.

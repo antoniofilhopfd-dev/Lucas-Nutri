@@ -11,15 +11,20 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-  rls:
+        env: { NEXT_PUBLIC_DEMO_MODE: "true" }
+  acesso:
+    # Testes de segurança/acesso contra um MariaDB real (substituem o RLS do Postgres)
     runs-on: ubuntu-latest
     services:
-      postgres:
-        image: postgres:16
-        env: { POSTGRES_PASSWORD: postgres }
-        ports: ["5432:5432"]
-        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
-    env: { PGHOST: localhost, PGUSER: postgres, PGPASSWORD: postgres }
+      mariadb:
+        image: mariadb:10.11
+        env: { MARIADB_ROOT_PASSWORD: root, MARIADB_DATABASE: bn_test, MARIADB_USER: bn, MARIADB_PASSWORD: bn }
+        ports: ["3306:3306"]
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=5s --health-retries=20
+    env: { TEST_MYSQL_URL: "mysql://bn:bn@127.0.0.1:3306/bn_test" }
     steps:
       - uses: actions/checkout@v4
-      - run: bash supabase/tests/run.sh
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run test:acesso

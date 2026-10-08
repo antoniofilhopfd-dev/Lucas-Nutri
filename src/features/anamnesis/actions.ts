@@ -1,25 +1,14 @@
 "use server";
-import { withSession, fail } from "@/lib/actions/helpers";
-import { buildAnamnesis, buildAnamnesisItems } from "@/lib/db/rows";
+import { comAtor } from "@/lib/actions/helpers";
+import { registrarAnamnese, decidirItens } from "@/server/services/anamnese";
 import { getExtractor } from "@/lib/ai/registry";
 import type { ExtractedItem } from "@/lib/ai/types";
 
-/** Extrai e devolve propostas SEM gravar dados clínicos. Só o relato e o provedor são registrados. */
-export async function extractAnamnesis(patientId: string, consultationId: string, text: string) {
+/** Extrai e devolve PROPOSTAS. Só o relato e o provedor ficam registrados; nada vira dado clínico sem revisão. */
+export async function extractAnamnesis(consultationId: string, text: string) {
   if (!text.trim()) return { ok: false as const, message: "Escreva ou grave o relato do paciente." };
-  const ex = getExtractor();    // padrão local; provedor externo exige consentimento
+  const ex = getExtractor();
   const items = await ex.extract(text, "text");
-  return withSession(async (sb) => {
-    const { data: a, error } = await sb.from("anamneses").insert(buildAnamnesis(patientId, consultationId, { rawText: text, extractor: ex.name })).select("id").single();
-    if (error || !a) return fail(error, "extractAnamnesis");
-    return { ok: true as const, anamnesisId: a.id as string, items };
-  });
+  return comAtor(async (a) => ({ anamnesisId: (await registrarAnamnese(a, consultationId, { rawText: text, extractor: ex.name })).id, items }));
 }
-/** Grava a decisão do nutricionista sobre cada item (confirmado, editado ou excluído). */
-export async function saveAnamnesisReview(anamnesisId: string, patientId: string, items: ExtractedItem[]) {
-  if (items.some((i) => i.status === "pending")) return { ok: false as const, message: "Ainda há itens sem decisão." };
-  return withSession(async (sb) => {
-    const { error } = await sb.from("anamnesis_items").insert(buildAnamnesisItems(anamnesisId, patientId, items));
-    return error ? fail(error, "saveAnamnesisReview") : { ok: true as const };
-  });
-}
+export async function saveAnamnesisReview(anamnesisId: string, items: ExtractedItem[]) { return comAtor(async (a) => { await decidirItens(a, anamnesisId, items); return {}; }); }

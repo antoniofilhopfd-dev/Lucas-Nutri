@@ -1,16 +1,12 @@
 "use server";
-import { supabaseServer } from "@/lib/supabase/server";
-import { SIGNED_URL_TTL_S } from "./rules";
+import { comAtor } from "@/lib/actions/helpers";
+import { salvarFoto } from "@/server/services/fotos";
+import { ANGLES, type Angle } from "./rules";
 
-/** Valida autorização (RLS) e registra o acesso antes de gerar a URL assinada de curta duração. */
-export async function signedPhotoUrl(photoId: string): Promise<{ ok: true; url: string } | { ok: false; message: string }> {
-  const sb = await supabaseServer();
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return { ok: false, message: "Faça login para continuar." };
-  const { data: photo } = await sb.from("body_photos").select("id, patient_id, storage_path").eq("id", photoId).maybeSingle(); // RLS: nega se não autorizado
-  if (!photo) return { ok: false, message: "Foto indisponível." };
-  const { data, error } = await sb.storage.from("patient-body-photos").createSignedUrl(photo.storage_path, SIGNED_URL_TTL_S);
-  if (error || !data) { console.error("signedPhotoUrl", error); return { ok: false, message: "Não foi possível abrir a foto." }; }
-  await sb.from("audit_logs").insert({ user_id: user.id, patient_id: photo.patient_id, action: "view", entity: "body_photos", entity_id: photo.id });
-  return { ok: true, url: data.signedUrl };
+/** Recebe a foto já comprimida (WebP/JPEG). O arquivo vai para o disco do servidor, fora da pasta pública. */
+export async function uploadBodyPhoto(consultationId: string, angle: string, form: FormData) {
+  const file = form.get("file");
+  if (!(file instanceof File) || !(ANGLES as readonly string[]).includes(angle)) return { ok: false as const, message: "Foto inválida." };
+  if (file.type !== "image/webp" && file.type !== "image/jpeg") return { ok: false as const, message: "Formato não suportado. Use JPEG ou WebP." };
+  return comAtor(async (a) => salvarFoto(a, consultationId, angle as Angle, Buffer.from(await file.arrayBuffer()), file.type as "image/webp"));
 }

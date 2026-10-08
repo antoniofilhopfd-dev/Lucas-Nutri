@@ -31,12 +31,12 @@ export function buildCircumferences(assessmentId: string, i: AssessmentInput) {
   return rows;   // assimetria nunca é gravada: é derivada |D − E|
 }
 
-export function buildEnergy(patientId: string, consultationId: string, input: EnergyInput, macro?: { mode: "percent"; pct: { protein: number; carbohydrate: number; fat: number } } | { mode: "g_per_kg"; protein: number; fat: number }) {
+export function buildEnergy(patientId: string, consultationId: string, createdBy: string, input: EnergyInput, macro?: { mode: "percent"; pct: { protein: number; carbohydrate: number; fat: number } } | { mode: "g_per_kg"; protein: number; fat: number }) {
   const r = calculateEnergy(input);
   const o = r.outputs as Record<string, any>;
   const calc = {
     patient_id: patientId, consultation_id: consultationId, equation: o.equation, equation_version: o.equation_version,
-    method: o.method as "factorial" | "detailed", tef: o.tef ?? null, inputs: r.inputs, outputs: r.outputs,
+    method: o.method as "factorial" | "detailed", tef: o.tef ?? null, inputs: r.inputs, outputs: r.outputs, created_by: createdBy,
   };
   const s = input.strategy;
   let macroOut: unknown = null, macroIn: unknown = null;
@@ -54,20 +54,20 @@ export const buildCheckin = (patientId: string, date: string, c: { waterMl: numb
   patient_id: patientId, checkin_date: date, water_ml: c.waterMl, water_goal_ml: c.goalMl ?? 3000,
   trained: c.trained ?? null, training_modality: c.trained ? c.modality ?? null : null, training_minutes: c.trained ? c.minutes ?? null : null,
 });
-export const buildMealLog = (patientId: string, m: { mealType: string; photoPath?: string; before?: string; after?: string }) => ({
-  patient_id: patientId, meal_type: m.mealType, photo_path: m.photoPath ?? null, feeling_before: m.before ?? null, feeling_after: m.after ?? null,
+export const buildMealLog = (patientId: string, date: string, m: { mealType: string; photoPath?: string; before?: string; after?: string }) => ({
+  patient_id: patientId, log_date: date, meal_type: m.mealType, photo_path: m.photoPath ?? null, feeling_before: m.before ?? null, feeling_after: m.after ?? null,
 });
 export const buildMessage = (patientId: string, senderId: string, receiverId: string, body: string) => ({ patient_id: patientId, sender_id: senderId, receiver_id: receiverId, kind: "text" as const, body });
 
 /** Só itens confirmados/editados chegam ao banco como dado clínico; os demais ficam registrados com o status. */
-export function buildAnamnesisItems(anamnesisId: string, patientId: string, items: ExtractedItem[]) {
-  return items.map((i) => ({ anamnesis_id: anamnesisId, patient_id: patientId, category: i.category, field: i.field, value: i.value, source_kind: i.source.kind, source_snippet: i.source.snippet, confidence: i.confidence ?? null, status: i.status }));
+export function buildAnamnesisItems(anamnesisId: string, patientId: string, decidedBy: string, items: ExtractedItem[]) {
+  return items.map((i) => ({ anamnesis_id: anamnesisId, patient_id: patientId, category: i.category, field: i.field, value: i.value, source_kind: i.source.kind, source_snippet: i.source.snippet, confidence: i.confidence ?? null, status: i.status, decided_by: decidedBy, decided_at: new Date() }));
 }
 export const confirmedOnly = (items: ExtractedItem[]) => toPersist(items);
 export const buildAnamnesis = (patientId: string, consultationId: string, o: { rawText: string; extractor: string; stt?: string }) => ({ patient_id: patientId, consultation_id: consultationId, raw_text: o.rawText, extractor_provider: o.extractor, stt_provider: o.stt ?? null });
 
-export const buildDiet = (patientId: string, consultationId: string, o: { vetKcal?: number; notes?: string; version?: number; parentId?: string }) => ({
-  patient_id: patientId, consultation_id: consultationId, version: o.version ?? 1, parent_id: o.parentId ?? null, status: "draft" as const, notes: o.notes ?? null, vet_kcal: o.vetKcal ?? null,
+export const buildDiet = (patientId: string, consultationId: string, createdBy: string, o: { vetKcal?: number; notes?: string; version?: number; parentId?: string }) => ({
+  patient_id: patientId, consultation_id: consultationId, version: o.version ?? 1, parent_id: o.parentId ?? null, status: "draft" as const, notes: o.notes ?? null, vet_kcal: o.vetKcal ?? null, created_by: createdBy,
 });
 export const buildDietMeal = (dietId: string, name: string, time: string | null, position: number) => ({ diet_id: dietId, name, meal_time: time, position });
 export const buildDietFood = (mealId: string, foodId: string, quantity: number, household?: string) => ({ meal_id: mealId, food_id: foodId, quantity, household_measure: household ?? null });
