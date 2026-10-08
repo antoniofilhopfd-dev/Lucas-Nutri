@@ -11,33 +11,45 @@ Há dois cenários bem diferentes. Hoje só o **A** está pronto.
 
 ---
 
-## Node.js na Hostinger (assistente "Node.js web app" a partir do GitHub)
+## Node.js na Hostinger: o que digitar em cada tela
 
-Foi o caminho que você abriu no hPanel. Funciona hoje em **modo demonstração**: o site mostra o protótipo, sem Supabase.
+O app segue a estrutura do AF+ (Next.js + MySQL da própria Hostinger + login próprio). Não usa Supabase.
 
-**Preencha assim**
-| Campo | Valor |
+### Tela 1 · hPanel → Bancos de dados → MySQL → criar
+| Campo | O que digitar |
 |---|---|
-| Repositório / branch | `antoniofilhopfd-dev/Lucas-Nutri` · branch `claude/bentonutrisync-saas-dev-pwzovg` (depois, a branch oficial) |
+| Nome do banco | `bento` (a Hostinger coloca um prefixo, algo como `u896255254_bento`: anote o nome final) |
+| Nome do usuário | `bento` (também ganha prefixo: anote o final) |
+| Senha | uma senha **só com letras e números**, 20+ caracteres (evita problema na URL). Guarde num gerenciador de senhas. |
+
+Anote os três valores finais: **banco**, **usuário** e **senha**.
+
+### Tela 2 · hPanel → Websites → Adicionar site → Aplicativo Web Node.js (a do seu print)
+| Campo | O que digitar |
+|---|---|
+| Repositório | `antoniofilhopfd-dev/Lucas-Nutri` |
+| Branch | `claude/bentonutrisync-saas-dev-pwzovg` |
+| Node.js | `22` |
 | Comando de construção | `npm run build` |
 | Gerenciador de pacotes | `npm` |
 | Diretório de saída | `.next` |
 | Comando de início | `npm start` |
-| Node.js | 20 ou 22 |
 
-**Variáveis de ambiente** (a Hostinger não deixa continuar com valor vazio; use estes valores temporários):
-| Chave | Valor agora |
+### Tela 3 · Variáveis de ambiente (mesma tela, mais abaixo)
+| Chave | Valor |
 |---|---|
-| `NEXT_PUBLIC_DEMO_MODE` | `true` |
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://exemplo.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `pendente` |
-| `SUPABASE_SERVICE_ROLE_KEY` | `pendente` |
+| `NEXT_PUBLIC_DEMO_MODE` | `true` (no começo; depois apague) |
+| `MYSQL_URL` | `mysql://USUARIO:SENHA@localhost:3306/BANCO` (troque pelos 3 valores anotados na Tela 1) |
+| `SESSION_SECRET` | texto aleatório de 32+ caracteres, **gerado por você** (veja abaixo) |
+| `APP_URL` | o endereço temporário do site, por enquanto (depois, o domínio) |
+| `STORAGE_DIR` | pasta fora do site, ex.: `/home/SEU_USUARIO/bentonutri-arquivos` (só quando for usar fotos) |
 
-Com `NEXT_PUBLIC_DEMO_MODE=true`, o endereço principal (`/`) e `/demo` abrem o protótipo, e `/nutri` e `/paciente` redirecionam para a demonstração (ficam **fechadas** até o Supabase existir). Os valores `exemplo` e `pendente` não são chaves reais.
+Para gerar o `SESSION_SECRET`: num gerenciador de senhas, gere uma senha aleatória de 40+ caracteres, ou rode `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. **Não cole esse valor em chat nem no GitHub.**
 
-**Quando o Supabase estiver pronto:** troque as três variáveis pelos valores reais, **apague** `NEXT_PUBLIC_DEMO_MODE` (ou ponha `false`) e **refaça o build** (variáveis `NEXT_PUBLIC_*` entram no código na hora do build). Nunca cole a `SUPABASE_SERVICE_ROLE_KEY` em chat, e-mail ou no GitHub: só no painel da Hostinger.
-
-**Atualização automática:** deixe ligada a opção de implantar a cada push no GitHub (ou use o webhook do hPanel). A cada push, a Hostinger refaz o build e o protótipo atualizado entra no ar.
+### Depois do primeiro deploy
+1. O banco **se atualiza sozinho** quando o app sobe (cria as tabelas). Não precisa de SSH.
+2. Primeiro acesso do nutricionista: no terminal do app (hPanel → SSH): `npm run auth:criar-nutri -- "Lucas Bento" "CRN-6 00000" seu@email.com` (o terminal pede a senha).
+3. Para sair do modo demonstração: apague `NEXT_PUBLIC_DEMO_MODE` e reimplante.
 
 ---
 
