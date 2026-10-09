@@ -93,7 +93,7 @@ Como funciona: a cada push que altera o protótipo, o GitHub Actions (`.github/w
 
 **Passos**
 1. Fazer o deploy; as tabelas são criadas sozinhas no primeiro acesso.
-2. Defina a variável `SETUP_TOKEN` (um código seu), reimplante e abra `/instalar`: informe o código, nome, CRN, e-mail e senha. A página só existe até o primeiro cadastro (depois dá 404); remova a variável em seguida. (Alternativa com terminal: `npm run auth:criar-nutri`.)
-3. Remover `NEXT_PUBLIC_DEMO_MODE` e reimplantar.
+2. Remover `NEXT_PUBLIC_DEMO_MODE`, reimplantar e abrir `/primeiro-acesso`: o administrador (você) informa nome, e-mail e a própria senha. A página só existe até esse primeiro cadastro (depois dá 404).
+3. Em **Mais → Equipe e convites**, gere o convite do Lucas (nome, e-mail, CRN): o sistema mostra um link único (válido por 7 dias) para enviar por WhatsApp; o Lucas abre e escolhe a própria senha. (Alternativa com terminal: `npm run auth:criar-nutri`.)
 4. Apontar o domínio e ativar o SSL; atualizar `APP_URL`.
 5. Testar: cadastrar paciente → gerar código de acesso → paciente entra em `/login`.

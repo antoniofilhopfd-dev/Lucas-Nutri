@@ -72,16 +72,22 @@ export async function autenticarProfissional(identificador: string, senha: strin
   if (!u || !ok || !u.ativo) return null;
   return { id: u.id, nome: u.nome, papel: u.papel };
 }
-export async function criarProfissional(o: { nome: string; papel: "nutritionist" | "admin"; crn?: string; email?: string; senha: string }): Promise<{ id: string }> {
+export type NovoProfissional = { nome: string; papel: "nutritionist" | "admin"; crn?: string; email?: string; senha: string };
+/** Grava o profissional dentro de uma transação já aberta (usado por criarProfissional, convites e primeiro acesso). */
+export async function inserirProfissional(q: Executor, o: NovoProfissional): Promise<{ id: string }> {
   const erro = validarSenha(o.senha); if (erro) throw new Error(erro);
   if (o.papel === "nutritionist" && !o.crn) throw new Error("Informe o CRN.");
   const id = randomUUID(), hash = await hashSenha(o.senha);
-  await transacao(async (q) => {
+  try {
     await q.executar("INSERT INTO usuarios (id, papel, nome, email, crn, senha_hash) VALUES (?,?,?,?,?,?)", [id, o.papel, o.nome, o.email ? normalizarEmail(o.email) : null, o.crn ? normalizarCrn(o.crn) : null, hash]);
     if (o.papel === "nutritionist") await q.executar("INSERT INTO nutritionists (id, crn) VALUES (?,?)", [id, normalizarCrn(o.crn!)]);
-  });
+  } catch (e) {
+    if ((e as { code?: string }).code === "ER_DUP_ENTRY") throw new Error("Já existe um cadastro com este e-mail ou CRN.");
+    throw e;
+  }
   return { id };
 }
+export const criarProfissional = (o: NovoProfissional) => transacao((q) => inserirProfissional(q, o));
 export async function definirSenha(usuarioId: string, senha: string): Promise<void> {
   const erro = validarSenha(senha); if (erro) throw new Error(erro);
   await executar("UPDATE usuarios SET senha_hash=? WHERE id=?", [await hashSenha(senha), usuarioId]);

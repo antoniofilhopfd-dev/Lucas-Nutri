@@ -244,4 +244,33 @@ rodar("acesso e segurança (MySQL real)", () => {
     await S.mysqlMod.executar("UPDATE sessoes SET expira_em=UTC_TIMESTAMP() - INTERVAL 1 MINUTE WHERE token_hash=?", [r.token_hash]);
     expect(await S.auth.usuarioDaSessao(token)).toBeNull();
   });
+  it("convite por link: só admin convida, token só em hash, uso único, expira, revoga; primeiro acesso fecha", async () => {
+    const C = await import("./convites");
+    await expect(C.criarConvite(NA, { nome: "Lucas Bento", email: "lucas@exemplo.com", crn: "CRN-6 2000", papel: "nutritionist" })).rejects.toThrow(/administrador/);
+    await expect(C.criarConvite(AD, { nome: "Lucas Bento", email: "lucas@exemplo.com", papel: "nutritionist" })).rejects.toThrow(/CRN/);
+    await expect(C.criarConvite(AD, { nome: "Dup", email: "admin@exemplo.com", papel: "admin" })).rejects.toThrow(/Já existe/);
+    const { token } = await C.criarConvite(AD, { nome: "Lucas Bento", email: "Lucas@Exemplo.com", crn: "CRN-6 2000", papel: "nutritionist" });
+    const [row] = await S.mysqlMod.consultar<any>("SELECT token_hash FROM convites WHERE email='lucas@exemplo.com'");
+    expect(row.token_hash).not.toBe(token); expect(row.token_hash).toHaveLength(64);
+    expect((await C.conviteValido(token))?.nome).toBe("Lucas Bento");
+    expect(await C.conviteValido("x".repeat(30))).toBeNull();
+    await expect(C.aceitarConvite(token, "fraca")).rejects.toThrow(/senha/i);
+    expect((await C.conviteValido(token))).not.toBeNull();                                  // senha fraca não gasta o convite
+    const u = await C.aceitarConvite(token, "Minha#Senha1");
+    expect((await S.auth.autenticarProfissional("CRN-6 2000", "Minha#Senha1"))?.id).toBe(u.id);
+    await expect(C.aceitarConvite(token, "Outra#Senha2")).rejects.toThrow(/inválido/);   // uso único
+    // expirado e revogado
+    const e = await C.criarConvite(AD, { nome: "Exp", email: "exp@exemplo.com", crn: "CRN-6 2001", papel: "nutritionist" });
+    await S.mysqlMod.executar("UPDATE convites SET expira_em=UTC_TIMESTAMP() - INTERVAL 1 MINUTE WHERE email='exp@exemplo.com'");
+    expect(await C.conviteValido(e.token)).toBeNull();
+    const r = await C.criarConvite(AD, { nome: "Rev", email: "rev@exemplo.com", crn: "CRN-6 2002", papel: "nutritionist" });
+    const [{ id }] = await S.mysqlMod.consultar<any>("SELECT id FROM convites WHERE email='rev@exemplo.com'");
+    await expect(C.revogarConvite(NA, id)).rejects.toThrow(/administrador/);
+    await C.revogarConvite(AD, id);
+    expect(await C.conviteValido(r.token)).toBeNull();
+    await expect(C.listarConvites(NA)).rejects.toThrow(/administrador/);
+    // primeiro acesso: já há profissionais, então fecha
+    expect(await C.semProfissionais()).toBe(false);
+    await expect(C.criarPrimeiroAdmin({ nome: "Intruso", email: "i@exemplo.com", senha: "Senha!234" })).rejects.toThrow(/já foi feito/);
+  });
 });

@@ -489,6 +489,41 @@
       "required": false
     }
   },
+  "convites": {
+    "id": {
+      "required": true
+    },
+    "token_hash": {
+      "required": true
+    },
+    "papel": {
+      "required": true
+    },
+    "nome": {
+      "required": true
+    },
+    "crn": {
+      "required": false
+    },
+    "email": {
+      "required": true
+    },
+    "criado_por": {
+      "required": true
+    },
+    "criado_em": {
+      "required": false
+    },
+    "expira_em": {
+      "required": true
+    },
+    "usado_em": {
+      "required": false
+    },
+    "revogado_em": {
+      "required": false
+    }
+  },
   "diets": {
     "id": {
       "required": true
