@@ -13,10 +13,18 @@ open(here + 'index.html', 'w').write(html)
 import shutil
 out = here + 'hostinger/'
 os.makedirs(out, exist_ok=True)
-shutil.copy(here + 'index.html', out + 'index.html')
-shutil.copy(brand + 'logo-mark.png', out + 'favicon.png')
-demo = here + '../public/demo/'
-os.makedirs(demo, exist_ok=True)
-shutil.copy(here + 'index.html', demo + 'index.html')
-shutil.copy(brand + 'logo-mark.png', demo + 'favicon.png')
+# Formato de aplicativo de celular: em tela larga, o protótipo roda dentro de uma coluna de 430px (iframe),
+# o que ativa o layout de celular; em celular, abre direto.
+def casca(app, fav):
+    return ('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+      '<title>BentoNutriSync Protótipo</title><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#2F5238">'
+      '<link rel="icon" type="image/png" href="' + fav + '"><style>html,body{margin:0;height:100%;background:#E4E2DA}'
+      'iframe{display:block;margin:0 auto;width:100%;max-width:430px;height:100vh;border:0;background:#fff;box-shadow:0 0 40px rgba(0,0,0,.12)}</style></head>'
+      '<body><iframe title="BentoNutriSync" src="' + app + '"></iframe>'
+      '<script>if(innerWidth<=820)location.replace("' + app + '")</script></body></html>')
+for pasta, app, nomefav, fav in ((out, 'app.html', 'favicon.png', 'favicon.png'), (here + '../public/demo/', '/demo/app.html', 'favicon.png', '/demo/favicon.png')):
+    os.makedirs(pasta, exist_ok=True)
+    shutil.copy(here + 'index.html', pasta + 'app.html')
+    open(pasta + 'index.html', 'w').write(casca(app, fav))
+    shutil.copy(brand + 'logo-mark.png', pasta + nomefav)
 print('ok', len(html))
