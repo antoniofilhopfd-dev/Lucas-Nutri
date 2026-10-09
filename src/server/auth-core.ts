@@ -72,14 +72,19 @@ export async function autenticarProfissional(identificador: string, senha: strin
   if (!u || !ok || !u.ativo) return null;
   return { id: u.id, nome: u.nome, papel: u.papel };
 }
-export type NovoProfissional = { nome: string; papel: "nutritionist" | "admin"; crn?: string; email?: string; senha: string };
+/** Senha certa, mas cadastro ainda não aprovado pelo administrador? (só revela depois de acertar a senha) */
+export async function contaPendente(identificador: string, senha: string): Promise<boolean> {
+  const [u] = await consultar<{ senha_hash: string | null; ativo: number }>("SELECT senha_hash, ativo FROM usuarios WHERE papel='nutritionist' AND (crn=? OR email=?) LIMIT 1", [normalizarCrn(identificador), normalizarEmail(identificador)]);
+  return !!u && !u.ativo && (await confereSenha(u.senha_hash, senha));
+}
+export type NovoProfissional = { nome: string; papel: "nutritionist" | "admin"; crn?: string; email?: string; senha: string; ativo?: boolean };
 /** Grava o profissional dentro de uma transação já aberta (usado por criarProfissional, convites e primeiro acesso). */
 export async function inserirProfissional(q: Executor, o: NovoProfissional): Promise<{ id: string }> {
   const erro = validarSenha(o.senha); if (erro) throw new Error(erro);
   if (o.papel === "nutritionist" && !o.crn) throw new Error("Informe o CRN.");
   const id = randomUUID(), hash = await hashSenha(o.senha);
   try {
-    await q.executar("INSERT INTO usuarios (id, papel, nome, email, crn, senha_hash) VALUES (?,?,?,?,?,?)", [id, o.papel, o.nome, o.email ? normalizarEmail(o.email) : null, o.crn ? normalizarCrn(o.crn) : null, hash]);
+    await q.executar("INSERT INTO usuarios (id, papel, nome, email, crn, senha_hash, ativo) VALUES (?,?,?,?,?,?,?)", [id, o.papel, o.nome, o.email ? normalizarEmail(o.email) : null, o.crn ? normalizarCrn(o.crn) : null, hash, o.ativo === false ? 0 : 1]);
     if (o.papel === "nutritionist") await q.executar("INSERT INTO nutritionists (id, crn) VALUES (?,?)", [id, normalizarCrn(o.crn!)]);
   } catch (e) {
     if ((e as { code?: string }).code === "ER_DUP_ENTRY") throw new Error("Já existe um cadastro com este e-mail ou CRN.");

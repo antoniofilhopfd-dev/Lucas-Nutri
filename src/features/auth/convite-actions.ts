@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { abrirSessao, actorAtual, homeDo, ipDaRequisicao, modoDemo } from "@/server/auth";
 import { registrar } from "@/server/auth-core";
-import { aceitarConvite, criarConvite, criarPrimeiroAdmin, revogarConvite, semProfissionais } from "@/server/convites";
+import { aceitarConvite, cadastrarProfissional, cadastrosRecentes, criarConvite, decidirPendente, revogarConvite } from "@/server/convites";
 import { AcessoNegado } from "@/server/authz";
 import { RegraNegocio } from "@/server/sql";
 import { revalidatePath } from "next/cache";
@@ -15,15 +15,22 @@ const msg = (e: unknown): { ok: false; message: string } => {
 };
 const redirecionar = (e: unknown) => { if ((e as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw e; };
 
-/** Primeiro acesso do sistema (só enquanto não há nenhum profissional). Cria o administrador e já entra. */
-export async function primeiroAcesso(f: { nome: string; email: string; senha: string }): Promise<R> {
-  if (modoDemo() || !(await semProfissionais())) return { ok: false, message: "Indisponível." };
+/** Cadastro na tela de login. Primeira conta = administrador (entra na hora); as demais aguardam aprovação. */
+export async function cadastrar(f: { nome: string; email: string; crn: string; senha: string }): Promise<R<{ pendente?: boolean }>> {
+  if (modoDemo()) return { ok: false, message: "Indisponível." };
+  const ip = await ipDaRequisicao();
   try {
-    const { id } = await criarPrimeiroAdmin(f);
+    if ((await cadastrosRecentes(ip)) >= 5) return { ok: false, message: "Muitas tentativas. Aguarde um pouco e tente de novo." };
+    const { id, ativo } = await cadastrarProfissional(f);
+    await registrar("cadastro", { usuarioId: id, identificador: f.email.toLowerCase().slice(0, 190), ip });
+    if (!ativo) return { ok: true, pendente: true };
     await abrirSessao(id);
-    await registrar("primeiro_acesso", { usuarioId: id, ip: await ipDaRequisicao() });
     redirect(homeDo("admin"));
   } catch (e) { redirecionar(e); return msg(e); }
+}
+
+export async function pendentes(id: string, aprovar: boolean): Promise<R> {
+  try { await decidirPendente(await actorAtual(), id, aprovar); revalidatePath("/nutri/equipe"); return { ok: true }; } catch (e) { return msg(e); }
 }
 
 /** O convidado escolhe a própria senha e entra. */

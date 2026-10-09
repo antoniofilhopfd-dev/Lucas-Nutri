@@ -244,7 +244,7 @@ rodar("acesso e segurança (MySQL real)", () => {
     await S.mysqlMod.executar("UPDATE sessoes SET expira_em=UTC_TIMESTAMP() - INTERVAL 1 MINUTE WHERE token_hash=?", [r.token_hash]);
     expect(await S.auth.usuarioDaSessao(token)).toBeNull();
   });
-  it("convite por link: só admin convida, token só em hash, uso único, expira, revoga; primeiro acesso fecha", async () => {
+  it("convite por link: só admin convida, token só em hash, uso único, expira, revoga; cadastro aberto com aprovação", async () => {
     const C = await import("./convites");
     await expect(C.criarConvite(NA, { nome: "Lucas Bento", email: "lucas@exemplo.com", crn: "CRN-6 2000", papel: "nutritionist" })).rejects.toThrow(/administrador/);
     await expect(C.criarConvite(AD, { nome: "Lucas Bento", email: "lucas@exemplo.com", papel: "nutritionist" })).rejects.toThrow(/CRN/);
@@ -271,6 +271,21 @@ rodar("acesso e segurança (MySQL real)", () => {
     await expect(C.listarConvites(NA)).rejects.toThrow(/administrador/);
     // primeiro acesso: já há profissionais, então fecha
     expect(await C.semProfissionais()).toBe(false);
-    await expect(C.criarPrimeiroAdmin({ nome: "Intruso", email: "i@exemplo.com", senha: "Senha!234" })).rejects.toThrow(/já foi feito/);
+    // cadastro aberto: com profissionais existentes, a conta nova fica pendente até o admin aprovar
+    await expect(C.cadastrarProfissional({ nome: "Sem Crn", email: "sc@exemplo.com", senha: "Senha!234" })).rejects.toThrow(/CRN/);
+    const n = await C.cadastrarProfissional({ nome: "Nova Nutri", email: "nova@exemplo.com", crn: "CRN-6 3000", senha: "Senha!234" });
+    expect(n.ativo).toBe(false);
+    expect(await S.auth.autenticarProfissional("nova@exemplo.com", "Senha!234")).toBeNull();           // não entra pendente
+    expect(await S.auth.contaPendente("nova@exemplo.com", "Senha!234")).toBe(true);
+    expect(await S.auth.contaPendente("nova@exemplo.com", "errada!234")).toBe(false);                    // não revela com senha errada
+    await expect(C.listarPendentes(NA)).rejects.toThrow(/administrador/);
+    await expect(C.decidirPendente(NA, n.id, true)).rejects.toThrow(/administrador/);
+    expect((await C.listarPendentes(AD)).map((x) => x.id)).toContain(n.id);
+    await C.decidirPendente(AD, n.id, true);
+    expect((await S.auth.autenticarProfissional("nova@exemplo.com", "Senha!234"))?.id).toBe(n.id);
+    const r2 = await C.cadastrarProfissional({ nome: "Outra Nutri", email: "outra@exemplo.com", crn: "CRN-6 3001", senha: "Senha!234" });
+    await C.decidirPendente(AD, r2.id, false);                                                          // recusada: some do sistema
+    expect(await S.auth.autenticarProfissional("outra@exemplo.com", "Senha!234")).toBeNull();
+    await expect(C.decidirPendente(AD, r2.id, true)).rejects.toThrow(/não encontrado/);
   });
 });

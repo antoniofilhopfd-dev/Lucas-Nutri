@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { nutritionistLoginSchema, phoneSchema, otpSchema, GENERIC_LOGIN_ERROR, GENERIC_CODE_ERROR } from "./schemas";
 import { abrirSessao, fecharSessao, homeDo, ipDaRequisicao, modoDemo, usuarioAtual } from "@/server/auth";
-import { autenticarProfissional, bloqueadoPorFalhas, emitirCodigo, entrarComCodigo, pacientePorTelefone, registrar } from "@/server/auth-core";
+import { autenticarProfissional, bloqueadoPorFalhas, contaPendente, emitirCodigo, entrarComCodigo, pacientePorTelefone, registrar } from "@/server/auth-core";
 import { bancoDireto } from "@/server/mysql";
 import { enviarCodigo, smsConfigurado } from "@/server/sms";
 
@@ -19,7 +19,7 @@ export async function loginProfissional(raw: unknown): Promise<R> {
   try {
     if (await bloqueadoPorFalhas(id, ip)) return FAIL(BLOQUEADO);
     const u = await autenticarProfissional(p.data.identifier, p.data.password);
-    if (!u) { await registrar("login_falhou", { identificador: id, ip }); return FAIL(GENERIC_LOGIN_ERROR); }
+    if (!u) { if (await contaPendente(p.data.identifier, p.data.password)) return FAIL("Seu cadastro está aguardando aprovação do administrador."); await registrar("login_falhou", { identificador: id, ip }); return FAIL(GENERIC_LOGIN_ERROR); }
     await abrirSessao(u.id);
     await registrar("login_ok", { usuarioId: u.id, identificador: id, ip });
     redirect(homeDo(u.papel));

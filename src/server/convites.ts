@@ -10,18 +10,41 @@ export interface Convite { id: string; nome: string; crn: string | null; email: 
 
 const hojeMais = (d: number) => new Date(Date.now() + d * 86_400_000);
 
-/** Primeiro acesso: só existe enquanto não há nenhum profissional cadastrado; cria o administrador. */
+/** Cadastro aberto na tela de login. A primeira conta do sistema vira administradora (ativa na hora); as demais ficam
+ *  "aguardando aprovação" e só entram depois que o administrador aprovar. */
 export const semProfissionais = async () => Number((await consultar<{ n: number }>("SELECT COUNT(*) AS n FROM usuarios WHERE papel IN ('nutritionist','admin')"))[0]?.n ?? 0) === 0;
+const traduz = (e: unknown) => (e instanceof Error && !(e instanceof RegraNegocio) ? new RegraNegocio(e.message) : e);
 
-export async function criarPrimeiroAdmin(o: { nome: string; email: string; senha: string }): Promise<{ id: string }> {
-  const email = normalizarEmail(o.email);
-  if (o.nome.trim().length < 3) throw new RegraNegocio("Informe o nome.");
+export async function cadastrarProfissional(o: { nome: string; email: string; crn?: string; senha: string }): Promise<{ id: string; ativo: boolean }> {
+  const email = normalizarEmail(o.email), nome = o.nome.trim(), crn = o.crn?.trim() || undefined;
+  if (nome.length < 3) throw new RegraNegocio("Informe o nome.");
   if (!emailValido(email)) throw new RegraNegocio("E-mail inválido.");
   return transacao(async (q) => {
-    const n = (await q.consultar<{ n: number }>("SELECT COUNT(*) AS n FROM usuarios WHERE papel IN ('nutritionist','admin') FOR UPDATE"))[0]?.n ?? 0;
-    if (Number(n) > 0) throw new RegraNegocio("O primeiro acesso já foi feito.");
-    try { return await inserirProfissional(q, { nome: o.nome.trim(), papel: "admin", email, senha: o.senha }); }
-    catch (e) { throw e instanceof Error && !(e instanceof RegraNegocio) ? new RegraNegocio(e.message) : e; }
+    const primeiro = Number((await q.consultar<{ n: number }>("SELECT COUNT(*) AS n FROM usuarios WHERE papel IN ('nutritionist','admin') FOR UPDATE"))[0]?.n ?? 0) === 0;
+    if (!primeiro && !crn) throw new RegraNegocio("Informe o CRN.");
+    try {
+      const { id } = await inserirProfissional(q, { nome, papel: primeiro ? "admin" : "nutritionist", crn, email, senha: o.senha, ativo: primeiro });
+      return { id, ativo: primeiro };
+    } catch (e) { throw traduz(e); }
+  });
+}
+export async function cadastrosRecentes(ip: string | null): Promise<number> {
+  if (!ip) return 0;
+  const [r] = await consultar<{ n: number }>("SELECT COUNT(*) AS n FROM log_acessos WHERE acao='cadastro' AND ip=? AND criado_em>?", [ip, new Date(Date.now() - 3_600_000)]);
+  return Number(r.n);
+}
+export async function listarPendentes(a: Actor) {
+  if (a.papel !== "admin") throw new RegraNegocio("Só o administrador vê os cadastros pendentes.");
+  return consultar<{ id: string; nome: string; email: string; crn: string | null; criado_em: Date }>("SELECT id, nome, email, crn, criado_em FROM usuarios WHERE papel='nutritionist' AND ativo=0 ORDER BY criado_em");
+}
+export async function decidirPendente(a: Actor, id: string, aprovar: boolean) {
+  if (a.papel !== "admin") throw new RegraNegocio("Só o administrador aprova cadastros.");
+  await transacao(async (q) => {
+    const [u] = await q.consultar<{ id: string }>("SELECT id FROM usuarios WHERE id=? AND papel='nutritionist' AND ativo=0 FOR UPDATE", [id]);
+    if (!u) throw new RegraNegocio("Cadastro não encontrado ou já decidido.");
+    if (aprovar) await q.executar("UPDATE usuarios SET ativo=1 WHERE id=?", [id]);
+    else { await q.executar("DELETE FROM nutritionists WHERE id=?", [id]); await q.executar("DELETE FROM usuarios WHERE id=?", [id]); }
+    await auditar(q, a, { action: aprovar ? "cadastro_aprovado" : "cadastro_recusado", entity: "usuarios", entityId: id });
   });
 }
 

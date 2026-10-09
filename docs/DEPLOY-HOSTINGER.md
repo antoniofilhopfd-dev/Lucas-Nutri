@@ -93,7 +93,7 @@ Como funciona: a cada push que altera o protótipo, o GitHub Actions (`.github/w
 
 **Passos**
 1. Fazer o deploy; as tabelas são criadas sozinhas no primeiro acesso.
-2. Remover `NEXT_PUBLIC_DEMO_MODE`, reimplantar e abrir `/primeiro-acesso`: o administrador (você) informa nome, e-mail e a própria senha. A página só existe até esse primeiro cadastro (depois dá 404).
-3. Em **Mais → Equipe e convites**, gere o convite do Lucas (nome, e-mail, CRN): o sistema mostra um link único (válido por 7 dias) para enviar por WhatsApp; o Lucas abre e escolhe a própria senha. (Alternativa com terminal: `npm run auth:criar-nutri`.)
+2. Remover `NEXT_PUBLIC_DEMO_MODE` e reimplantar. Em `/login → Nutricionista → Criar conta de nutricionista` (`/cadastro`, sempre disponível) a **primeira** conta vira administradora e entra na hora; as seguintes ficam aguardando aprovação.
+3. O administrador aprova em **Mais → Equipe e convites** (ou gera um convite por link). Quem se cadastra sem aprovação não entra.
 4. Apontar o domínio e ativar o SSL; atualizar `APP_URL`.
 5. Testar: cadastrar paciente → gerar código de acesso → paciente entra em `/login`.

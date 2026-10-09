@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { loginProfissional, pedirCodigo, entrarPaciente } from "@/features/auth/actions";
 import { maskPhoneBR } from "@/lib/utils/phone";
@@ -26,6 +27,7 @@ export default function Login() {
           <label className="block">CRN ou e-mail<input className={f} value={ident} onChange={(e) => setIdent(e.target.value)} autoComplete="username" /></label>
           <label className="block">Senha<input className={f} type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="current-password" /></label>
           <button disabled={pending} className="min-h-11 w-full rounded-lg bg-olive text-white disabled:opacity-50">{pending ? "Entrando…" : "Entrar"}</button>
+          <p className="text-center text-sm"><Link className="underline" href="/cadastro">Criar conta de nutricionista</Link></p>
         </form>
       ) : step === "phone" ? (
         <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); run(() => pedirCodigo({ phone }), () => setStep("code")); }}>
