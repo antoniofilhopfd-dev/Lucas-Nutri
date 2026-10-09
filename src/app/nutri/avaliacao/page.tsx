@@ -12,7 +12,7 @@ export default function Avaliacao() {
   return (
     <section className="space-y-4">
       <h1 className="text-2xl font-semibold">Avaliação física</h1>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3">
         {([["weight", "Peso (kg)"], ["height", "Altura (cm)"], ["waist", "Cintura (cm)"], ["hip", "Quadril (cm)"], ["r", "Bíceps relaxado D (cm)"], ["l", "Bíceps relaxado E (cm)"]] as const).map(([k, t]) =>
           <label key={k}>{t}<input type="number" step="0.1" className={f} value={v[k]} onChange={set(k)} /></label>)}
       </div>

@@ -20,7 +20,7 @@ export default function Energia() {
   return (
     <section className="space-y-4">
       <h1 className="text-2xl font-semibold">Gasto energético</h1>
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid gap-3">
         <label>Equação<select className={f} value={eq} onChange={(e) => setEq(e.target.value as BmrEquation)}>{EQ.map((k) => <option key={k} value={k}>{BMR_META[k].name}</option>)}</select></label>
         <label>Sexo<select className={f} value={sex} onChange={(e) => setSex(e.target.value as "male" | "female")}><option value="female">Feminino</option><option value="male">Masculino</option></select></label>
         <label>Atividade<select className={f} value={level} onChange={(e) => setLevel(e.target.value as ActivityLevel)}>{Object.entries(ACTIVITY_FACTORS).map(([k, v]) => <option key={k} value={k}>{k} ({v})</option>)}</select></label>

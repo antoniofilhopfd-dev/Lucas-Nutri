@@ -23,7 +23,7 @@ export default async function Prontuario({ params }: { params: Promise<{ id: str
     <section className="space-y-4">
       <div><h1 className="text-2xl font-semibold">{p.nome}</h1>
         <p className="text-sm text-graphite/70">{ageAt(dataISO(p.birth_date), new Date().toISOString().slice(0, 10))} anos · {p.primary_goal ?? "objetivo não informado"}</p></div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3">
         <article className="rounded-xl border border-mist bg-white p-4"><h2 className="font-medium">Última avaliação</h2>
           {ult ? <p>{Number(ult.weight_kg)} kg · IMC {Number(ult.bmi).toFixed(1)} ({classifyBmi(Number(ult.bmi))}){ant && <span className="text-sm text-graphite/70"> · Δ {(Number(ult.weight_kg) - Number(ant.weight_kg)).toFixed(1)} kg</span>}</p> : <p className="text-graphite/70">Nenhuma avaliação registrada.</p>}</article>
         <article className="rounded-xl border border-mist bg-white p-4"><h2 className="font-medium">Gasto energético</h2>
